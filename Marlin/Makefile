@@ -488,19 +488,19 @@ extcoff: $(TARGET).elf
 	$(NM) -n $< > $@
 
 	# Link: create ELF output file from library.
-$(BUILD_DIR)/$(TARGET).elf: $(OBJ) Configuration.h
+$(BUILD_DIR)/$(TARGET).elf: $(OBJ) config/Configuration.h
 	$(Pecho) "  CXX   $@"
 	$P $(CC) $(ALL_CXXFLAGS) -Wl,--gc-sections -o $@ -L. $(OBJ) $(LDFLAGS)
 
-$(BUILD_DIR)/%.o: %.c Configuration.h Configuration_adv.h $(MAKEFILE)
+$(BUILD_DIR)/%.o: %.c config/Configuration.h config/Configuration_adv.h $(MAKEFILE)
 	$(Pecho) "  CC    $<"
 	$P $(CC) -MMD -c $(ALL_CFLAGS) $< -o $@
 
-$(BUILD_DIR)/%.o: $(BUILD_DIR)/%.cpp Configuration.h Configuration_adv.h $(MAKEFILE)
+$(BUILD_DIR)/%.o: $(BUILD_DIR)/%.cpp config/Configuration.h config/Configuration_adv.h $(MAKEFILE)
 	$(Pecho) "  CXX   $<"
 	$P $(CXX) -MMD -c $(ALL_CXXFLAGS) $< -o $@
 
-$(BUILD_DIR)/%.o: %.cpp Configuration.h Configuration_adv.h $(MAKEFILE)
+$(BUILD_DIR)/%.o: %.cpp config/Configuration.h config/Configuration_adv.h $(MAKEFILE)
 	$(Pecho) "  CXX   $<"
 	$P $(CXX) -MMD -c $(ALL_CXXFLAGS) $< -o $@
 
