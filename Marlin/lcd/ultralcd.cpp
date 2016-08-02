@@ -20,19 +20,25 @@
  *
  */
 
-#include "ultralcd.h"
+#include "../inc/MarlinConfig.h"
+
 #if ENABLED(ULTRA_LCD)
-#include "Marlin.h"
-#include "language.h"
-#include "cardreader.h"
-#include "temperature.h"
-#include "stepper.h"
-#include "configuration_store.h"
+
+#include "ultralcd.h"
+
+#include "../core/language.h"
+#include "../sd/cardreader.h"
+#include "../module/temperature.h"
+#include "../module/stepper.h"
+#include "../module/configuration_store.h"
+#include "../module/buzzer.h"
 
 #if ENABLED(PRINTCOUNTER)
-  #include "printcounter.h"
-  #include "duration_t.h"
+  #include "../module/printcounter.h"
+  #include "../util/duration_t.h"
 #endif
+
+#include "../Marlin.h"
 
 int preheatHotendTemp1, preheatBedTemp1, preheatFanSpeed1,
     preheatHotendTemp2, preheatBedTemp2, preheatFanSpeed2;
@@ -141,7 +147,7 @@ uint8_t lcdDrawUpdate = LCDVIEW_CLEAR_CALL_REDRAW; // Set when the LCD needs to 
   #endif
 
   #if ENABLED(MANUAL_BED_LEVELING)
-    #include "mesh_bed_leveling.h"
+    #include "../module/mesh_bed_leveling.h"
   #endif
 
   // Function pointer to menu functions.

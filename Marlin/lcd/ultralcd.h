@@ -23,7 +23,7 @@
 #ifndef ULTRALCD_H
 #define ULTRALCD_H
 
-#include "Marlin.h"
+#include "../Marlin.h"
 
 #if ENABLED(ULTRA_LCD)
 

@@ -27,7 +27,7 @@
 * Implementation of the LCD display routines for a Hitachi HD44780 display. These are common LCD character displays.
 **/
 
-#include "duration_t.h"
+#include "../util/duration_t.h"
 
 extern volatile uint8_t buttons;  //an extended version of the last checked buttons in a bit array.
 
