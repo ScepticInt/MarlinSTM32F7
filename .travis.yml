@@ -58,9 +58,9 @@ script:
   #
   # Backup Configuration.h, Configuration_adv.h, and pins_RAMPS.h
   #
-  - cp Marlin/pins_RAMPS.h Marlin/pins_RAMPS.h.backup
   - cp Marlin/config/Configuration.h Marlin/config/Configuration.h.backup
   - cp Marlin/config/Configuration_adv.h Marlin/config/Configuration_adv.h.backup
+  - cp Marlin/pins/pins_RAMPS.h Marlin/pins/pins_RAMPS.h.backup
   #
   # Build with the default configurations
   #
