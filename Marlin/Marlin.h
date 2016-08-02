@@ -22,6 +22,10 @@
 #ifndef MARLIN_H
 #define MARLIN_H
 
+#include "core/utility.h"
+#include "core/enum.h"
+#include "core/types.h"
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,12 +37,7 @@
 #include <avr/eeprom.h>
 #include <avr/interrupt.h>
 
-#include "MarlinConfig.h"
-
-#include "enum.h"
-#include "types.h"
-#include "fastio.h"
-#include "utility.h"
+#include "inc/MarlinConfig.h"
 
 #ifdef USBCON
   #include "HardwareSerial.h"
@@ -48,16 +47,16 @@
     #define MYSERIAL Serial
   #endif // BLUETOOTH
 #else
-  #include "MarlinSerial.h"
+  #include "module/MarlinSerial.h"
   #define MYSERIAL customizedSerial
 #endif
 
 #include "WString.h"
 
 #if ENABLED(PRINTCOUNTER)
-  #include "printcounter.h"
+  #include "module/printcounter.h"
 #else
-  #include "stopwatch.h"
+  #include "module/stopwatch.h"
 #endif
 
 #define SERIAL_CHAR(x) MYSERIAL.write(x)
@@ -212,12 +211,6 @@ void manage_inactivity(bool ignore_stepper_queue = false);
 
 #endif // !MIXING_EXTRUDER
 
-/**
- * The axis order in all axis related arrays is X, Y, Z, E
- */
-#define NUM_AXIS 4
-#define _AXIS(AXIS) AXIS ##_AXIS
-
 void enable_all_steppers();
 void disable_all_steppers();
 
@@ -228,10 +221,6 @@ void reset_bed_level();
 void kill(const char*);
 
 void quickstop_stepper();
-
-#if ENABLED(FILAMENT_RUNOUT_SENSOR)
-  void handle_filament_runout();
-#endif
 
 extern uint8_t marlin_debug_flags;
 #define DEBUGGING(F) (marlin_debug_flags & (DEBUG_## F))
@@ -382,12 +371,6 @@ extern uint8_t active_extruder;
 #endif
 
 void calculate_volumetric_multipliers();
-
-// Buzzer
-#if HAS_BUZZER
-  #include "buzzer.h"
-  extern Buzzer buzzer;
-#endif
 
 /**
  * Blocking movement and shorthand functions

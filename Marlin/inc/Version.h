@@ -28,7 +28,7 @@
 
 #if ENABLED(USE_AUTOMATIC_VERSIONING)
 
-  #include "_Version.h"
+  #include "../config/_Version.h"
 
 #else
 
