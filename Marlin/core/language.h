@@ -23,7 +23,7 @@
 #ifndef LANGUAGE_H
 #define LANGUAGE_H
 
-#include "MarlinConfig.h"
+#include "../inc/MarlinConfig.h"
 
 // Fallback if no language is set. DON'T CHANGE
 #ifndef LCD_LANGUAGE
@@ -234,11 +234,11 @@
 
 // LCD Menu Messages
 
-#define LANGUAGE_INCL_(M) STRINGIFY_(language_##M.h)
+#define LANGUAGE_INCL_(M) STRINGIFY_(../lcd/language/language_##M.h)
 #define LANGUAGE_INCL(M) LANGUAGE_INCL_(M)
 #define INCLUDE_LANGUAGE LANGUAGE_INCL(LCD_LANGUAGE)
 
 #include INCLUDE_LANGUAGE
-#include "language_en.h"
+#include "../lcd/language/language_en.h"
 
 #endif //__LANGUAGE_H

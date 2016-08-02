@@ -116,4 +116,10 @@
 
 #define CEILING(x,y) (((x) + (y) - 1) / (y))
 
+/**
+ * The axis order in all axis related arrays is X, Y, Z, E
+ */
+#define NUM_AXIS 4
+#define _AXIS(AXIS) AXIS ##_AXIS
+
 #endif //__MACROS_H
