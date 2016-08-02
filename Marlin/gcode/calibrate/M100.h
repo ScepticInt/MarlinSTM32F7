@@ -40,24 +40,57 @@
 #define M100_FREE_MEMORY_DUMPER     // Comment out to remove Dump sub-command
 #define M100_FREE_MEMORY_CORRUPTOR    // Comment out to remove Corrupt sub-command
 
-#include "Marlin.h"
-
-#if ENABLED(M100_FREE_MEMORY_WATCHER)
 extern char* __brkval;
 extern size_t  __heap_start, __heap_end, __flp;
 extern char __bss_end;
 
 //
-// Utility functions used by M100 to get its work done.
+// Utility functions for M100
 //
 
-char* top_of_stack();
-void prt_hex_nibble(unsigned int);
-void prt_hex_byte(unsigned int);
-void prt_hex_word(unsigned int);
-int how_many_E5s_are_here(char*);
+// top_of_stack() returns the location of a variable on its stack frame.  The value returned is above
+// the stack once the function returns to the caller.
 
-void gcode_M100() {
+char* top_of_stack() {
+  char x;
+  return &x + 1; // x is pulled on return;
+}
+
+//
+// 3 support routines to print hex numbers.  We can print a nibble, byte and word
+//
+
+void prt_hex_nibble(unsigned int n) {
+  if (n <= 9)
+    SERIAL_ECHO(n);
+  else
+    SERIAL_ECHO((char)('A' + n - 10));
+}
+
+void prt_hex_byte(unsigned int b) {
+  prt_hex_nibble((b & 0xf0) >> 4);
+  prt_hex_nibble(b & 0x0f);
+}
+
+void prt_hex_word(unsigned int w) {
+  prt_hex_byte((w & 0xff00) >> 8);
+  prt_hex_byte(w & 0x0ff);
+}
+
+//
+// Count 0xE5's at the specified location.
+// Used by the search code.
+//
+int how_many_E5s_are_here(char* p) {
+  int n;
+  for (n = 0; n < 32000; n++) {
+    if (*(p + n) != (char)0xe5)
+      return n - 1;
+  }
+  return -1;
+}
+
+inline void gcode_M100() {
   static bool m100_not_initialized = true;
   char* sp, *ptr;
   int i, j, n;
@@ -202,47 +235,3 @@ void gcode_M100() {
   }
   return;
 }
-
-// top_of_stack() returns the location of a variable on its stack frame.  The value returned is above
-// the stack once the function returns to the caller.
-
-char* top_of_stack() {
-  char x;
-  return &x + 1; // x is pulled on return;
-}
-
-//
-// 3 support routines to print hex numbers.  We can print a nibble, byte and word
-//
-
-void prt_hex_nibble(unsigned int n) {
-  if (n <= 9)
-    SERIAL_ECHO(n);
-  else
-    SERIAL_ECHO((char)('A' + n - 10));
-}
-
-void prt_hex_byte(unsigned int b) {
-  prt_hex_nibble((b & 0xf0) >> 4);
-  prt_hex_nibble(b & 0x0f);
-}
-
-void prt_hex_word(unsigned int w) {
-  prt_hex_byte((w & 0xff00) >> 8);
-  prt_hex_byte(w & 0x0ff);
-}
-
-// how_many_E5s_are_here() is a utility function to easily find out how many 0xE5's are
-// at the specified location.  Having this logic as a function simplifies the search code.
-//
-int how_many_E5s_are_here(char* p) {
-  int n;
-  for (n = 0; n < 32000; n++) {
-    if (*(p + n) != (char)0xe5)
-      return n - 1;
-  }
-  return -1;
-}
-
-#endif
-
