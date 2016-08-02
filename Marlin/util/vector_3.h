@@ -41,6 +41,8 @@
 #ifndef VECTOR_3_H
 #define VECTOR_3_H
 
+#include "../inc/MarlinConfig.h"
+
 #if ENABLED(AUTO_BED_LEVELING_FEATURE)
 class matrix_3x3;
 
