@@ -26,7 +26,7 @@
  *
  * This file is part of the Arduino Sd2Card Library
  */
-#include "Marlin.h"
+#include "../Marlin.h"
 #if ENABLED(SDSUPPORT)
 
 #ifndef SdBaseFile_h
@@ -35,7 +35,7 @@
  * \file
  * \brief SdBaseFile class
  */
-#include "Marlin.h"
+#include "../Marlin.h"
 #include "SdFatConfig.h"
 #include "SdVolume.h"
 //------------------------------------------------------------------------------

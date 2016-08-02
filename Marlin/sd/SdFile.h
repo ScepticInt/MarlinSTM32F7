@@ -22,36 +22,42 @@
 
 /**
  * Arduino SdFat Library
- * Copyright (C) 2008 by William Greiman
+ * Copyright (C) 2009 by William Greiman
  *
  * This file is part of the Arduino Sd2Card Library
  */
-#include "Marlin.h"
-#if ENABLED(SDSUPPORT)
-
-#ifndef SdFatUtil_h
-#define SdFatUtil_h
 /**
  * \file
- * \brief Useful utility functions.
+ * \brief SdFile class
  */
-#include "Marlin.h"
-#include "MarlinSerial.h"
-/** Store and print a string in flash memory.*/
-#define PgmPrint(x) SerialPrint_P(PSTR(x))
-/** Store and print a string in flash memory followed by a CR/LF.*/
-#define PgmPrintln(x) SerialPrintln_P(PSTR(x))
+#include "../Marlin.h"
 
-namespace SdFatUtil {
-  int FreeRam();
-  void print_P(PGM_P str);
-  void println_P(PGM_P str);
-  void SerialPrint_P(PGM_P str);
-  void SerialPrintln_P(PGM_P str);
-}
+#if ENABLED(SDSUPPORT)
+#include "SdBaseFile.h"
+#include <Print.h>
+#ifndef SdFile_h
+#define SdFile_h
+//------------------------------------------------------------------------------
+/**
+ * \class SdFile
+ * \brief SdBaseFile with Print.
+ */
+class SdFile : public SdBaseFile, public Print {
+ public:
+  SdFile() {}
+  SdFile(const char* name, uint8_t oflag);
+  #if ARDUINO >= 100
+    size_t write(uint8_t b);
+  #else
+   void write(uint8_t b);
+  #endif
 
-using namespace SdFatUtil;  // NOLINT
-#endif  //#define SdFatUtil_h
+  int16_t write(const void* buf, uint16_t nbyte);
+  void write(const char* str);
+  void write_P(PGM_P str);
+  void writeln_P(PGM_P str);
+};
+#endif  // SdFile_h
 
 
 #endif

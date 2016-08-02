@@ -20,12 +20,15 @@
  *
  */
 
-#include "Marlin.h"
 #include "cardreader.h"
-#include "ultralcd.h"
-#include "stepper.h"
-#include "temperature.h"
-#include "language.h"
+
+#include "../lcd/ultralcd.h"
+#include "../core/language.h"
+
+#include "../module/stepper.h"
+#include "../module/temperature.h"
+
+#include "../Marlin.h"
 
 #if ENABLED(SDSUPPORT)
 

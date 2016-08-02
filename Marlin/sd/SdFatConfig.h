@@ -30,7 +30,7 @@
  * \file
  * \brief configuration definitions
  */
-#include "Marlin.h"
+#include "../Marlin.h"
 #if ENABLED(SDSUPPORT)
 
 #ifndef SdFatConfig_h
