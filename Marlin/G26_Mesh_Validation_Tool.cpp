@@ -1,6 +1,6 @@
 /*
  * Marlin Firmware -- G26 - Mesh Validation Tool
- */
+*/
 
 /**
  * Marlin 3D Printer Firmware
@@ -36,9 +36,9 @@
  *  - http://reprap.org/pipermail/reprap-dev/2011-May/003323.html
  */
 
-#define   FILAMENT_FACTOR 1.0			// This is too much clutter for the main Configuration.h file  But
+#define   EXTRUSION_MULTIPLIER 1.0			// This is too much clutter for the main Configuration.h file  But
 #define   RETRACTION_MULTIPLIER 1.0		// some user have expressed an interest in being able to customize
-#define   NOZZLE 0.3 				// these numbers for thier printer so they don't need to type all
+#define   NOZZLE 0.4 				// these numbers for thier printer so they don't need to type all
 #define   FILAMENT 1.75 			// the options every time they do a Mesh Validation Print.
 #define   LAYER_HEIGHT   .2
 #define   PRIME_LENGTH 10.0			// So, we put these number in an easy to find and change place.
@@ -57,6 +57,8 @@
 #ifdef UNIFIED_BED_LEVELING_FEATURE 
 
 #define SIZE_OF_INTERSECTION_CIRCLES	5
+#define SIZE_OF_CROSS_HAIRS		3	// cross hairs inside the circle.  This number should be
+						// less than SIZE_OR_INTERSECTION_CIRCLES
 
 
 // Roxy's G26 Mesh Validation Tool
@@ -144,7 +146,7 @@ void prime_nozzle();
 void chirp_at_user();
 
 static unsigned circle_flags[16], horizontal_mesh_line_flags[16], vertical_mesh_line_flags[16], Continue_with_closest=0;
-static float G26_E_AXIS_feedrate = 0.030;
+static float G26_E_AXIS_feedrate = 0.025;
 static float Random_Deviation = 0.0, Layer_Height=LAYER_HEIGHT;
 
 static bool retracted=false;	// We keep track of the state of the nozzle to know if it
@@ -163,7 +165,7 @@ void debug_current_and_destination(char *title);
 void mesh_buffer_line(float, float, float, float, float, uint8_t );
 //		uint16_t x_splits = 0xffff, uint16_t y_splits = 0xffff);  /* needed for the old mesh_buffer_line() routine */
 
-static float E_Pos_Delta, Filament_Factor=FILAMENT_FACTOR;
+static float E_Pos_Delta, Extrusion_Multiplier=EXTRUSION_MULTIPLIER;
 static float Retraction_Multiplier=RETRACTION_MULTIPLIER;
 static float Nozzle=NOZZLE , Filament=FILAMENT, Prime_Length=PRIME_LENGTH;
 static float X_Pos, Y_Pos, bed_temp=BED_TEMP, hotend_temp=HOTEND_TEMP, Ooooze_Amount=OOOOZE_AMOUNT;
@@ -175,7 +177,7 @@ void gcode_G26() {
 float circle_x, circle_y, x, y, dx, dy, xe, ye, tmp;
 float start_angle, end_angle;
 float E_Pos=0.0;
-int   i, j, k, xi, yi; 
+int   i, j, k, xi, yi, lcd_init_counter=0;
 struct mesh_index_pair location;
 
   if ( axis_unhomed_error(true, true, true) )	 // Don't allow Mesh Validation without homing first
@@ -358,6 +360,11 @@ debug_current_and_destination(seg_msg);
 
 			print_line_from_here_to_there( x, y, Layer_Height, xe, ye, Layer_Height);
 		}
+		lcd_init_counter++;
+		if (lcd_init_counter > 10 ) {
+			lcd_init_counter = 0;
+			lcd_init();	// Some people's LCD Displays are locking up.  This might help them
+		}
 
      		debug_current_and_destination("Looking for lines to connect.");
 		look_for_lines_to_connect();
@@ -369,20 +376,31 @@ debug_current_and_destination(seg_msg);
   } while (location.x_index>=0 && location.y_index>=0 );
 
 LEAVE:
+
+
   retract_filament();
   destination[Z_AXIS] = Z_RAISE_BETWEEN_PROBINGS;				// Raise the nozzle
+
+debug_current_and_destination("ready to do Z-Raise.");
   move_to( destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], 0);	// Raise the nozzle
+debug_current_and_destination("done doing Z-Raise.");
 
   destination[X_AXIS] = X_Pos;							// Move back to the starting position
   destination[Y_AXIS] = Y_Pos;
+  destination[Z_AXIS] = Z_RAISE_BETWEEN_PROBINGS;				// Keep the nozzle where it is
+
   move_to( destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], 0);	// Move back to the starting position
+debug_current_and_destination("done doing X/Y move.");
 
   UBL_has_control_of_LCD_Panel = 0;			// Give back control of the LCD Panel!
 
   if ( !Keep_Heaters_On) {
+#if HAS_TEMP_BED
   	thermalManager.setTargetBed( 0.0 );
+#endif
 	thermalManager.setTargetHotend( 0.0 , 0 );
   }
+lcd_init();	// Some people's LCD Displays are locking up.  This might help them
 }
 
 
@@ -488,11 +506,11 @@ int i, j, k;
 // Print it!
 //
 					sx = blm.map_x_index_to_bed_location(i);	
-					sx = sx + SIZE_OF_INTERSECTION_CIRCLES;			// get the right edge of the circle
+					sx = sx+SIZE_OF_INTERSECTION_CIRCLES-SIZE_OF_CROSS_HAIRS;	// get the right edge of the circle
 					sy = blm.map_y_index_to_bed_location(j);
 
 					ex = blm.map_x_index_to_bed_location(i+1);	
-					ex = ex - SIZE_OF_INTERSECTION_CIRCLES;			// get the left edge of the circle
+					ex = ex-SIZE_OF_INTERSECTION_CIRCLES+SIZE_OF_CROSS_HAIRS;	// get the left edge of the circle
 					ey = sy;
 
 					sx= constrain( sx, X_MIN_POS+1, X_MAX_POS-1); 	// This keeps us from bumping the endstops	
@@ -529,11 +547,11 @@ debug_current_and_destination("Connecting horizontal line.");
 // Print it!
 					sx = blm.map_x_index_to_bed_location(i);	
 					sy = blm.map_y_index_to_bed_location(j);
-					sy = sy + SIZE_OF_INTERSECTION_CIRCLES;			// get the top edge of the circle
+					sy = sy+SIZE_OF_INTERSECTION_CIRCLES-SIZE_OF_CROSS_HAIRS;	// get the top edge of the circle
 
 					ex = sx;
 					ey = blm.map_y_index_to_bed_location(j+1); 
-					ey = ey - SIZE_OF_INTERSECTION_CIRCLES;			// get the bottom edge of the circle
+					ey = ey-SIZE_OF_INTERSECTION_CIRCLES+SIZE_OF_CROSS_HAIRS;	// get the bottom edge of the circle
 
 					sx= constrain( sx, X_MIN_POS+1, X_MAX_POS-1); 	// This keeps us from bumping the endstops	
 					sy= constrain( sy, Y_MIN_POS+1, Y_MAX_POS-1); 			
@@ -561,9 +579,33 @@ debug_current_and_destination("Connecting vertical line.");
 }
 
 void debug_current_and_destination(char *title) {
+float dx, dy, de, xy_dist, fpmm;
 
-if (G26_Debug_flag==0)
+if ( *title != '!' ) 	// if the title message starts with a '!' it is so important, we are going to 
+			// ignore the status of the G26_Debug_Flag
+	if ( G26_Debug_flag==0)
+		return;
+dx = current_position[X_AXIS] - destination[X_AXIS];
+dy = current_position[Y_AXIS] - destination[Y_AXIS];
+de = destination[E_AXIS] - current_position[E_AXIS];
+if ( de==0.0) {
+	idle();
 	return;
+}
+
+xy_dist = sqrt( dx*dx + dy*dy );
+if ( xy_dist==0.0) {
+		idle();
+		return;
+		SERIAL_ECHOPGM("   FPMM=");
+		fpmm = de;
+		SERIAL_ECHO_F( fpmm, 6 );
+}
+	else	{
+		SERIAL_ECHOPGM("   fpmm=");
+		fpmm = de / xy_dist;
+		SERIAL_ECHO_F( fpmm, 6 );
+	}
 
 SERIAL_ECHOPGM("    current=( ");
 SERIAL_ECHO_F( current_position[X_AXIS], 6 );
@@ -614,43 +656,76 @@ pinMode(66, INPUT_PULLUP); // Roxy's Left Switch is on pin 66.  Right Switch is 
 
 void move_to( float x, float y, float z, float e_delta) {
 float feed_value, e_pos;
+bool  has_XY_component = false;
 static float last_z = -999.99;
+
+   if ( x!=current_position[X_AXIS] || y!=current_position[Y_AXIS]) // Check if X or Y is involved in the movement.
+	has_XY_component = true;
+
+if (G26_Debug_flag!=0) {
+SERIAL_ECHOPAIR("in move_to()  has_XY_component:", (int) has_XY_component);
+SERIAL_ECHO("\n");
+}
 
    if ( z != last_z )  {
 	last_z = z;
 	feed_value = planner.max_feedrate[Z_AXIS]/(3.0);	// Base the feed rate off of the configured Z_AXIS feed rate
 
+	destination[X_AXIS] = current_position[X_AXIS];
+	destination[Y_AXIS] = current_position[Y_AXIS];
+	destination[Z_AXIS] = z;	// We know the last_z==z or we wouldn't be in this block of code.
+	destination[E_AXIS] = current_position[E_AXIS];
+
 if (G26_Debug_flag!=0) {
-SERIAL_ECHOPGM("  in move_to()  z!=last_z  ");
-SERIAL_ECHOPAIR(" z=",z);
-SERIAL_ECHOPAIR(" last_z=",last_z);
-SERIAL_ECHO("  \n");
+SERIAL_ECHOPAIR("in move_to()  changing Z to ", (int) z );
+SERIAL_ECHO("\n");
 }
 
-	e_pos = destination[E_AXIS] + e_delta;
+//	e_pos = destination[E_AXIS] + e_delta;
+//	destination[E_AXIS] += e_delta;
+//	mesh_buffer_line( x, y, z, e_pos, feed_value, (unsigned char) 0 );
 
-debug_current_and_destination(" in move_to() before adjusting Z");
-	mesh_buffer_line( x, y, z, e_pos, feed_value, (unsigned char) 0 );
-debug_current_and_destination(" in move_to() after adjusting Z");
+  	mesh_buffer_line( destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feed_value, 0 );
 
 	stepper.synchronize();
   	set_destination_to_current();
-	return;
+
+if (G26_Debug_flag!=0) {
+debug_current_and_destination(" in move_to() done with Z move");
+}
+//	return;
    }
 
-  if ( x!=destination[X_AXIS] || y!=destination[Y_AXIS])  {	// Check if X or Y is involved in the movement.
-	feed_value = PLANNER_XY_FEEDRATE()/(10.0);		// Yes!  It is a 'normal' movement
+  if ( has_XY_component)  {				// Check if X or Y is involved in the movement.
+	feed_value = PLANNER_XY_FEEDRATE()/(10.0);	// Yes!  It is a 'normal' movement
   } else  {
+/*
+      f = min( planner.max_feedrate[2], planner.max_feedrate[3] );
+      f = f * 60.0;
+      if ( f > feedrate )	// don't let the feedrate go higher than what was specified.
+        f = feedrate;
+*/
 	feed_value = planner.max_feedrate[E_AXIS]/(1.5);	// it is just a retract() or un_retract()
   }
 
+if (G26_Debug_flag!=0) {
+SERIAL_ECHOPAIR("in move_to()  feed_value for XY:", feed_value );
+SERIAL_ECHO("\n");
+}
+
   destination[X_AXIS] = x;
   destination[Y_AXIS] = y;
-  destination[Z_AXIS] = z;	// We know the last_z==z or we wouldn't be in this block of code.
+//  destination[Z_AXIS] = z;	// We know the last_z==z or we wouldn't be in this block of code.
   destination[E_AXIS] += e_delta;
 
-//debug_current_and_destination(" in move_to() doing normal move");
+if (G26_Debug_flag!=0) 
+debug_current_and_destination(" in move_to() doing last move");
+
   mesh_buffer_line( destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feed_value, 0 );
+
+if (G26_Debug_flag!=0) 
+debug_current_and_destination(" in move_to() after last move");
+
 //SERIAL_ECHOPGM(" end of move_to()\n");
 
 //  stepper.synchronize();
@@ -735,11 +810,9 @@ if (G26_Debug_flag!=0) {
 SERIAL_ECHOPGM("  filament retracted.\n");
 }
 	}
-	move_to( sx, sy, sz, 0.0 );	// Get to the starting point with no extrusion
-     	dx = ex - sx;
-	dy = ey - sy;
+		move_to( sx, sy, sz, 0.0 );	// Get to the starting point with no extrusion
 
-	E_Pos_Delta = Line_Length * G26_E_AXIS_feedrate * Filament_Factor;
+	E_Pos_Delta = Line_Length * G26_E_AXIS_feedrate * Extrusion_Multiplier;
 
 	un_retract_filament();
 if (G26_Debug_flag!=0) {
@@ -756,7 +829,7 @@ debug_current_and_destination("doing final move_to() inside print_line_from_here
 
 bool parse_G26_parameters() {
 
-   Filament_Factor	= FILAMENT_FACTOR;
+   Extrusion_Multiplier	= EXTRUSION_MULTIPLIER;
    Retraction_Multiplier= RETRACTION_MULTIPLIER;
    Nozzle		= NOZZLE;
    Filament		= FILAMENT;
@@ -839,10 +912,10 @@ bool parse_G26_parameters() {
 		return true;
 	}
   }
-  Filament_Factor = 1.75*1.75 / (Filament*Filament);	// If we aren't using 1.75mm filament, we need to
-  							// scale up or down the length needed to get the
-							// same volume of filament
- Filament_Factor = Filament*(Nozzle*Nozzle)/(.4*.4); 	// Scale up by nozzle size
+  Extrusion_Multiplier *= 1.75*1.75 / (Filament*Filament);	// If we aren't using 1.75mm filament, we need to
+	  							// scale up or down the length needed to get the
+								// same volume of filament
+  Extrusion_Multiplier *= Filament*(Nozzle*Nozzle)/(.3*.3); 	// Scale up by nozzle size
  
   if (code_seen('H')) {
 	hotend_temp = code_value_float();
@@ -902,13 +975,15 @@ bool parse_G26_parameters() {
 //
 
 bool turn_on_heaters() {
-#if ENABLED(ULTRA_LCD)
-  lcd_setstatus( "G26 Heating Bed.  ", true);
-  lcd_quick_feedback();
-#endif
-  UBL_has_control_of_LCD_Panel++;
-  thermalManager.setTargetBed( bed_temp );
-  while( abs(thermalManager.degBed()-bed_temp) > 3 ) {
+#if HAS_TEMP_BED
+  #if ENABLED(ULTRA_LCD)
+    if ( bed_temp > 25 ) {
+      lcd_setstatus( "G26 Heating Bed.  ", true);
+      lcd_quick_feedback();
+  #endif
+      UBL_has_control_of_LCD_Panel++;
+      thermalManager.setTargetBed( bed_temp );
+      while( abs(thermalManager.degBed()-bed_temp) > 3 ) {
   	if ( G29_lcd_clicked() ) {
 		strcpy( lcd_status_message, "Leaving G26    "); // We can't do lcd_setstatus() without having it continue;
   		while ( G29_lcd_clicked() )			// Debounce the switch
@@ -917,11 +992,12 @@ bool turn_on_heaters() {
 		return 1;
 	}
 	idle();
-  }
-
-#if ENABLED(ULTRA_LCD)
-  lcd_setstatus( "G26 Heating Nozzle. ", true);
-  lcd_quick_feedback();
+      }
+  #if ENABLED(ULTRA_LCD)
+    }
+    lcd_setstatus( "G26 Heating Nozzle. ", true);
+    lcd_quick_feedback();
+  #endif
 #endif
  
 //
@@ -1003,16 +1079,11 @@ void prime_nozzle() {
 	  }
 }
 
-
-void chirp_at_user() {
-#if ENABLED(LCD_USE_I2C_BUZZER)
-   lcd.buzz(LCD_FEEDBACK_FREQUENCY_DURATION_MS, LCD_FEEDBACK_FREQUENCY_HZ);
-#elif PIN_EXISTS(BEEPER)
-   buzzer.tone(LCD_FEEDBACK_FREQUENCY_DURATION_MS, LCD_FEEDBACK_FREQUENCY_HZ);
 #endif
-}
 
-#endif
+
+
+
 
 
 
