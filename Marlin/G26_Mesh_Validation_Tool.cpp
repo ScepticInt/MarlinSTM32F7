@@ -146,7 +146,7 @@ void prime_nozzle();
 void chirp_at_user();
 
 static unsigned circle_flags[16], horizontal_mesh_line_flags[16], vertical_mesh_line_flags[16], Continue_with_closest=0;
-static float G26_E_AXIS_feedrate = 0.025;
+static float G26_E_AXIS_feedrate = 0.020;
 static float Random_Deviation = 0.0, Layer_Height=LAYER_HEIGHT;
 
 static bool retracted=false;	// We keep track of the state of the nozzle to know if it
