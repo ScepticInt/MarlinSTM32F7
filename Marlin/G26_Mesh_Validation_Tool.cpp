@@ -668,6 +668,11 @@ SERIAL_ECHO("\n");
 }
 
    if ( z != last_z )  {
+
+if (G26_Debug_flag!=0) {
+SERIAL_ECHOPAIR("in move_to()  changing Z to ", (int) z );
+SERIAL_ECHO("\n");
+}
 	last_z = z;
 	feed_value = planner.max_feedrate[Z_AXIS]/(3.0);	// Base the feed rate off of the configured Z_AXIS feed rate
 
@@ -676,14 +681,6 @@ SERIAL_ECHO("\n");
 	destination[Z_AXIS] = z;	// We know the last_z==z or we wouldn't be in this block of code.
 	destination[E_AXIS] = current_position[E_AXIS];
 
-if (G26_Debug_flag!=0) {
-SERIAL_ECHOPAIR("in move_to()  changing Z to ", (int) z );
-SERIAL_ECHO("\n");
-}
-
-//	e_pos = destination[E_AXIS] + e_delta;
-//	destination[E_AXIS] += e_delta;
-//	mesh_buffer_line( x, y, z, e_pos, feed_value, (unsigned char) 0 );
 
   	mesh_buffer_line( destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feed_value, 0 );
 
@@ -693,18 +690,11 @@ SERIAL_ECHO("\n");
 if (G26_Debug_flag!=0) {
 debug_current_and_destination(" in move_to() done with Z move");
 }
-//	return;
    }
 
   if ( has_XY_component)  {				// Check if X or Y is involved in the movement.
 	feed_value = PLANNER_XY_FEEDRATE()/(10.0);	// Yes!  It is a 'normal' movement
   } else  {
-/*
-      f = min( planner.max_feedrate[2], planner.max_feedrate[3] );
-      f = f * 60.0;
-      if ( f > feedrate )	// don't let the feedrate go higher than what was specified.
-        f = feedrate;
-*/
 	feed_value = planner.max_feedrate[E_AXIS]/(1.5);	// it is just a retract() or un_retract()
   }
 
@@ -715,7 +705,6 @@ SERIAL_ECHO("\n");
 
   destination[X_AXIS] = x;
   destination[Y_AXIS] = y;
-//  destination[Z_AXIS] = z;	// We know the last_z==z or we wouldn't be in this block of code.
   destination[E_AXIS] += e_delta;
 
 if (G26_Debug_flag!=0) 
@@ -726,10 +715,8 @@ debug_current_and_destination(" in move_to() doing last move");
 if (G26_Debug_flag!=0) 
 debug_current_and_destination(" in move_to() after last move");
 
-//SERIAL_ECHOPGM(" end of move_to()\n");
-
-//  stepper.synchronize();
-//  set_destination_to_current();
+  stepper.synchronize();
+  set_destination_to_current();
 }
 
 void retract_filament()
@@ -1080,11 +1067,6 @@ void prime_nozzle() {
 }
 
 #endif
-
-
-
-
-
 
 
 
