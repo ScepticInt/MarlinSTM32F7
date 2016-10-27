@@ -38,7 +38,7 @@
 
 #define   EXTRUSION_MULTIPLIER 1.0			// This is too much clutter for the main Configuration.h file  But
 #define   RETRACTION_MULTIPLIER 1.0		// some user have expressed an interest in being able to customize
-#define   NOZZLE 0.4 				// these numbers for thier printer so they don't need to type all
+#define   NOZZLE 0.3 				// these numbers for thier printer so they don't need to type all
 #define   FILAMENT 1.75 			// the options every time they do a Mesh Validation Print.
 #define   LAYER_HEIGHT   .2
 #define   PRIME_LENGTH 10.0			// So, we put these number in an easy to find and change place.
