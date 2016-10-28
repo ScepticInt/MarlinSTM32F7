@@ -125,6 +125,7 @@ uint8_t lcdDrawUpdate = LCDVIEW_CLEAR_CALL_REDRAW; // Set when the LCD needs to 
   static void lcd_control_temperature_preheat_abs_settings_menu();
   static void lcd_control_motion_menu();
   static void lcd_control_volumetric_menu();
+  void chirp_at_user();
 
   #if ENABLED(LCD_INFO_MENU)
     #if ENABLED(PRINTCOUNTER)
@@ -2829,6 +2830,22 @@ void lcd_reset_alert_level() { lcd_status_message_level = 0; }
       return true;
     #endif
   }
+
+void chirp_at_user() {
+#if ENABLED(LCD_USE_I2C_BUZZER)
+   lcd.buzz(LCD_FEEDBACK_FREQUENCY_DURATION_MS, LCD_FEEDBACK_FREQUENCY_HZ);
+#elif PIN_EXISTS(BEEPER)
+   buzzer.tone(LCD_FEEDBACK_FREQUENCY_DURATION_MS, LCD_FEEDBACK_FREQUENCY_HZ);
+#endif
+//     #if HAS_BUZZER	// from M600 command
+//        millis_t ms = millis();
+//        if (ms >= next_tick) {
+//          buzzer.tone(300, 2000);
+//          next_tick = ms + 2500; // Beep every 2.5s while waiting
+//        }
+//      #endif
+//      idle(true);
+}
 
   bool lcd_clicked() { 
 #if ENABLED(UNIFIED_BED_LEVELING_FEATURE)
