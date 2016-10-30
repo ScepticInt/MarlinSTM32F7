@@ -1,3 +1,4 @@
+
 #include "Marlin.h"
 
 #if ENABLED(UNIFIED_BED_LEVELING_FEATURE)
@@ -47,8 +48,7 @@ extern long babysteps_done;
 
      Parameters understood by this leveling system:
 
-      A     Activate  Activate the Unified Bed Leveling system.  The State of the UBL System will be updated
-    		      in the EEPROM and will persist across reset and power cycles.
+      A     Activate  Activate the Unified Bed Leveling system.  
 
       B #   Business  Use the 'Business Card' mode of the Manual Probe subsystem.  This is invoked as
       		      G29 P2 B   The mode of G29 P2 allows you to use a bussiness card or recipe card
@@ -71,8 +71,10 @@ extern long babysteps_done;
 		      location in its search for the closest unmeasured Mesh Point.  When used with a G29 Z C 
 		      it indicates to use the current location instead of defaulting to the center of the print bed.
 
-      D     Disable   Disable the Unified Bed Leveling system.  The State of the UBL System will be updated
-      		      in the EEPROM and will persist across reset and power cycles.
+      D     Disable   Disable the Unified Bed Leveling system.  
+
+      E     Export    Export the active Mesh being used by the system.  The text generated can be saved and later
+                      sent by PronterFace or Repetier Host to reconstruct the current mesh on another machine.
 
       F #   Fade      Fade the amount of Mesh Based Compensation over a specified height.  At the specified height, 
       		      no correction is applied and natural printer kenimatics take over.  If no number is specified 
@@ -116,8 +118,8 @@ start off being initialized with a G29 P0 or a G29 P1.   Further refinement of t
 each additional Phase that processes it.
 
       P0    Phase 0   Zero Mesh Data and turn off the Mesh Compensation System.  This reverts the
-                      Delta Printer to the same state it was in before the Delta Mesh Based Compensation
-                      System was turned on.  Setting the entire Mesh to Zero is a special case that allows
+                      3D Printer to the same state it was in before the Unified Bed Leveling Compensation
+                      was turned on.  Setting the entire Mesh to Zero is a special case that allows
                       a subsequent G or T leveling operation for backward compatability.
 
       P1    Phase 1   Invalidate entire Mesh and continue with automatic generation of the Mesh data using
@@ -217,10 +219,12 @@ each additional Phase that processes it.
       		      command is not anticipated to be of much value to the typical user.  It is intended
 		      for developers to help them verify correct operation of the Unified Bed Leveling System.
 
-      S     Store     Store the current Mesh in the Activated area of the EEPROM.
+      S     Store     Store the current Mesh in the Activated area of the EEPROM.  It will also store the 
+                      current state of the Unified Bed Leveling system in the EEPROM.
 
       S #   Store     Store the current Mesh at the specified location in EEPROM.  Activate this location
-                      for subsequent Load and Store operations.
+                      for subsequent Load and Store operations.  It will also store the current state of 
+		      the Unified Bed Leveling system in the EEPROM.
 
       T     3-Point   Perform a 3 Point Bed Leveling on the current Mesh
 
@@ -308,7 +312,7 @@ void gcode_G29() {
  if ( axis_unhomed_error(true, true, true) )	 // Don't allow auto-leveling without homing first
    gcode_G28();
 
- if ( G29_Parameter_Parsing() )			// if parsing the simple paramters causes a problem,
+ if ( G29_Parameter_Parsing() )			// if parsing the simple parameters causes a problem,
 	 return;				// we abort the command.
 
   if ( code_seen('I') ) {			// Invalidate Mesh Points     This command is a little bit asymetrical because
@@ -433,7 +437,7 @@ void gcode_G29() {
 				return;
 			}
 		}
-		manually_probe_remaining_mesh( X_Pos, Y_Pos, Height_Value, card_thickness,  code_seen('O') || code_seen('M') );
+		manually_probe_remaining_mesh( X_Pos, Y_Pos, Height_Value, card_thickness, code_seen('O') || code_seen('M') );
         	break;
 //
 // Populate invalid Mesh areas with a constant
@@ -454,7 +458,7 @@ void gcode_G29() {
 //
 // Fine Tune (Or Edit) the Mesh
 //
-      case 4:  	fine_tune_mesh( X_Pos, Y_Pos, Height_Value,  code_seen('O') || code_seen('M') );
+      case 4:  	fine_tune_mesh( X_Pos, Y_Pos, Height_Value, code_seen('O') || code_seen('M') );
         	break;
       case 5:   Find_Mean_Mesh_Height();
 	    	break;
@@ -508,7 +512,7 @@ void gcode_G29() {
 // When we are fully debugged, the EEPROM dump command will get deleted also.  But
 // right now, it is good to have the extra information.   Soon... we prune this.
 //
-  if ( code_seen('E') ) 
+  if ( code_seen('J') ) 
 	  G29_EEPROM_Dump();   // EEPROM Dump
 
 
@@ -573,7 +577,7 @@ void gcode_G29() {
   }
 
 
-  if (  code_seen('O') || code_seen('M') ) {
+  if ( code_seen('O') || code_seen('M') ) {
     i = 0;
     if (code_has_value())
       i = code_value_int();
@@ -629,6 +633,21 @@ void gcode_G29() {
 	lcd_implementation_clear();
 	restore_UBL_active_state_and_leave(); 
     }
+  }
+
+  if ( code_seen('E') ) {
+    	SERIAL_ECHOPGM("G29 I 999\n");
+	for (i = 0; i < MESH_NUM_X_POINTS; i++) {
+		for (j = 0;  j < MESH_NUM_Y_POINTS; j++) {
+    			if ( !isnan(z_values[i][j]) ) {
+				SERIAL_ECHOPAIRPGM("M421 I ", i);
+				SERIAL_ECHOPAIRPGM(" J ", j);
+				SERIAL_ECHOPGM(" Z ");
+				SERIAL_ECHO_F( z_values[i][j], 6 );
+				SERIAL_ECHO(" \n");
+			}
+		}
+	}
   }
 
 LEAVE: 
@@ -1087,85 +1106,39 @@ void dump( char *str, float f )
 // or I light up more or less of them depending upon the value of a variable.   I some times
 // used the white one to indicate a + or - value of the Mesh Point being used in the calculations.
 
+// Left cluster of 3 LED's
+// Pin 57  White LED on Left
+// Pin 58  Red   LED on Top
+// Pin 59  White LED on Right
+//
+// Right cluster of 3 LED's
+// Pin 64  Red   LED  Left
 // Pin 44  White LED  Top
 // Pin 63  Red   LED  Right
-// Pin 64  Red   LED  Left
 //
 
-//
-// This code is written to be as fast as possible, not to conserve memory!
-//
 void status_LED( int pin, int action)
 {
-static int pin_63 = -1, pin_64 = -1, pin_44 = -1;
+static int LED_initialized = 0;
+
+	if ( !LED_initialized ) { 
+		pinMode(57,OUTPUT); pinMode(58,OUTPUT); pinMode(59,OUTPUT);
+		pinMode(44,OUTPUT); pinMode(63,OUTPUT); pinMode(64,OUTPUT);
+		LED_initialized++;
+	}
 
 	switch (pin) {
-	case 44:	if (pin_44== -1){		// if so, we need to initialize the mode to output
-				pin_44 = 0x00;		// toggle the pin's status to simpile On/Off mode
-    				pinMode(44, OUTPUT);
-			}
-			if (action==0) {
-       				digitalWrite(44, 0);
-				pin_44 = 0;	// remember the pin is turned off
-				return;
-			}
-			if (action==1) {
-       				digitalWrite(44, 255);
-				pin_44 = 1;	// remember the pin is turned on
-				return;
-			}
-			if (pin_44) { // toggle the pin's status
-				pin_44 = 0;
-				digitalWrite(44, 0);
-			} else {
-				pin_44 = 1;
-				digitalWrite(44, 255);
-			}
-			break;
-	case 63:	if (pin_63== -1){		// if so, we need to initialize the mode to output
-				pin_63 = 0x00;		// toggle the pin's status to simpile On/Off mode
-    				pinMode(63, OUTPUT);
-			}
-			if (action==0) {
-       				digitalWrite(63, 0);
-				pin_63 = 0;	// remember the pin is turned off
-				return;
-			}
-			if (action==1) {
-       				digitalWrite(63, 255);
-				pin_63 = 1;	// remember the pin is turned on
-				return;
-			}
-			if (pin_63) { // toggle the pin's status
-				pin_63 = 0;
-				digitalWrite(63, 0);
-			} else {
-				pin_63 = 1;
-				digitalWrite(63, 255);
-			}
-			break;
-
-	case 64:	if (pin_64== -1){		// if so, we need to initialize the mode to output
-				pin_64 = 0x00;		// toggle the pin's status to simpile On/Off mode
-    				pinMode(65, OUTPUT);
-			}
-			if (action==0) {
-       				digitalWrite(65, 0);
-				pin_64 = 0;	// remember the pin is turned off
-				return;
-			}
-			if (action==1) {
-       				digitalWrite(65, 255);
-				pin_64 = 1;	// remember the pin is turned on
-				return;
-			}
-			if (pin_64) { // toggle the pin's status
-				pin_64 = 0;
-				digitalWrite(65, 0);
-			} else {
-				pin_64 = 1;
-				digitalWrite(65, 255);
-			}
+	case 44: case 57: case 58: case 59: case 63: case 64:
+			if ( action==0 )
+       				digitalWrite(pin, 0);
+			else 
+				if ( action==1 )
+       					digitalWrite(pin, 255);
+			     	else
+					if ( digitalRead(pin) )  
+       						digitalWrite(pin, 0);
+					else 
+       						digitalWrite(pin, 255);
 			break;
 
 	default:	SERIAL_ECHOPAIRPGM("?Unable to take action on LED pin: ", pin);
@@ -1232,17 +1205,17 @@ void G29_What_Command() {
     int k;
     k = E2END - Unified_Bed_Leveling_EEPROM_start;
     Statistics_Flag++;
+
+    SERIAL_PROTOCOLPGM("Version #4: 10/30/2016 branch \n");
     SERIAL_PROTOCOLPGM("Unified Bed Leveling System ");
     if ( blm.state.active )
     	SERIAL_PROTOCOLPGM("Active.");
     else
     	SERIAL_PROTOCOLPGM("Inactive.");
     SERIAL_PROTOCOLPGM("  -------------------------------------       <----<<< \n"); 	// These arrows are just to help me 
-    											// find this info buried in the clutter
-    SERIAL_PROTOCOLPGM("\n");
 
     if ( blm.state.EEPROM_storage_slot == 0xffff )  {
-    	SERIAL_PROTOCOLPGM("No Mesh Loaded.\n");
+    	SERIAL_PROTOCOLPGM("No Mesh Loaded.");
     	SERIAL_PROTOCOLPGM("  -------------------------------------       <----<<< \n"); // These arrows are just to help me 
 											 // find this info buried in the clutter
     }
@@ -1256,7 +1229,7 @@ void G29_What_Command() {
 
 
     SERIAL_ECHOPAIRPGM("\nG29_Correction_Fade_Height : ", blm.state.G29_Correction_Fade_Height );
-    SERIAL_PROTOCOLPGM("  ----------------------------------       <----<<< \n"); 	// These arrows are just to help me 
+    SERIAL_PROTOCOLPGM("  -------------------------------------       <----<<< \n"); 	// These arrows are just to help me 
     											// find this info buried in the clutter
     idle();
 
@@ -1510,9 +1483,9 @@ unsigned long cnt;
 	round_off = round_off - (round_off % 5l);		// closest 0 or 5 at the 3rd decimal place.
 	new_z = ((float) (round_off))/1000.0;			
 
-SERIAL_ECHOPGM("Mesh Point Currently At:  ");
-SERIAL_ECHO_F( new_z, 6 );
-SERIAL_ECHOPGM("\n");
+//SERIAL_ECHOPGM("Mesh Point Currently At:  ");
+//SERIAL_ECHO_F( new_z, 6 );
+//SERIAL_ECHOPGM("\n");
 
 	lcd_implementation_clear();
 	lcd_mesh_edit_setup( new_z );
