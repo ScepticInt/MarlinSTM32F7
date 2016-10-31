@@ -765,6 +765,10 @@ float xProbe, yProbe, measured_z;
 LEAVE:
     STOW_PROBE();
     restore_UBL_active_state_and_leave();
+
+    X_Pos = constrain( X_Pos-X_PROBE_OFFSET_FROM_EXTRUDER, X_MIN_POS, X_MAX_POS);
+    Y_Pos = constrain( Y_Pos-Y_PROBE_OFFSET_FROM_EXTRUDER, Y_MIN_POS, Y_MAX_POS);
+
     do_blocking_move_to_xy(X_Pos, Y_Pos);
 }
 
