@@ -159,12 +159,55 @@ volatile signed char count_direction[NUM_AXIS] = { 1, 1, 1, 1 };
 
 #define E_APPLY_STEP(v,Q) E_STEP_WRITE(v)
 
-// intRes = intIn1 * intIn2 >> 16
-// uses:
-// r26 to store 0
-// r27 to store the byte 1 of the 24 bit result
-#define MultiU16X8toH16(intRes, charIn1, intIn2) \
-  asm volatile ( \
+#ifdef ARDUINO_ARCH_SAMD
+  //return static_cast<unsigned int>((static_cast<int64_t>(timer)*static_cast<int64_t>(accel))>>18);
+  #define MultiU24X32toH16(intRes, longIn1, longIn2)  ((intRes) = ((long long)(longIn1) * (long long)(longIn2))>>24)
+
+  void initStepperTimer(void) {
+    GCLK->CLKCTRL.reg = (uint16_t) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK3 | GCLK_CLKCTRL_ID( STEPPER_TIMER_ID )) ;
+  
+    STEPPER_TIMER->COUNT16.CTRLA.reg &= ~(TC_CTRLA_ENABLE);       //disable TC module
+    STEPPER_TIMER->COUNT16.CTRLA.reg |=TC_CTRLA_MODE_COUNT16;
+    STEPPER_TIMER->COUNT16.CTRLA.reg |= TC_CTRLA_WAVEGEN_MFRQ;
+    STEPPER_TIMER->COUNT16.CTRLA.reg |= TC_CTRLA_PRESCALER_DIV4;
+    STEPPER_TIMER->COUNT16.CC[0].reg = 2000;
+    STEPPER_TIMER->COUNT16.INTENSET.reg = TC_INTFLAG_MC0;
+    STEPPER_TIMER->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;
+    STEPPER_TIMER->COUNT16.INTFLAG.reg = 0xFF;
+    NVIC_DisableIRQ(STEPPER_TIMER_IRQ);
+    NVIC_ClearPendingIRQ(STEPPER_TIMER_IRQ);
+    NVIC_SetPriority(STEPPER_TIMER_IRQ, 0);
+    NVIC_EnableIRQ(STEPPER_TIMER_IRQ);
+
+    #if ENABLED(ADVANCE) || ENABLED(LIN_ADVANCE)
+      GCLK->CLKCTRL.reg = (uint16_t) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK3 | GCLK_CLKCTRL_ID(ADVANCE_STEPPER_TIMER_ID));
+
+      ADVANCE_STEPPER_TIMER->COUNT16.CTRLA.reg &= ~(TC_CTRLA_ENABLE);  //disable TC module
+      ADVANCE_STEPPER_TIMER->COUNT16.CTRLA.reg |= TC_CTRLA_MODE_COUNT16;
+      ADVANCE_STEPPER_TIMER->COUNT16.CTRLA.reg |= TC_CTRLA_WAVEGEN_MFRQ;
+      ADVANCE_STEPPER_TIMER->COUNT16.CTRLA.reg |= TC_CTRLA_PRESCALER_DIV4;  //2MHz
+      ADVANCE_STEPPER_TIMER->COUNT16.CC[0].reg = 200;//10kHz
+      ADVANCE_STEPPER_TIMER->COUNT16.INTENSET.reg = TC_INTFLAG_MC0;
+      ADVANCE_STEPPER_TIMER->COUNT16.CTRLA.reg |= TC_CTRLA_ENABLE;
+      ADVANCE_STEPPER_TIMER->COUNT16.INTFLAG.reg = 0xFF;
+      NVIC_DisableIRQ(ADVANCE_STEPPER_TIMER_IRQ);
+      NVIC_ClearPendingIRQ(ADVANCE_STEPPER_TIMER_IRQ);
+      NVIC_SetPriority(ADVANCE_STEPPER_TIMER_IRQ, 2);
+      NVIC_EnableIRQ(ADVANCE_STEPPER_TIMER_IRQ);
+    #endif
+
+    // NVIC_SetPriority((IRQn_Type) USB_IRQn, 2UL);
+    // NVIC_EnableIRQ((IRQn_Type) USB_IRQn);
+  }
+
+#else // AVR
+
+  // intRes = intIn1 * intIn2 >> 16
+  // uses:
+  // r26 to store 0
+  // r27 to store the byte 1 of the 24 bit result
+  #define MultiU16X8toH16(intRes, charIn1, intIn2) \
+    asm volatile ( \
                  "clr r26 \n\t" \
                  "mul %A1, %B2 \n\t" \
                  "movw %A0, r0 \n\t" \
@@ -184,18 +227,18 @@ volatile signed char count_direction[NUM_AXIS] = { 1, 1, 1, 1 };
                  "r26" \
                )
 
-// intRes = longIn1 * longIn2 >> 24
-// uses:
-// r26 to store 0
-// r27 to store bits 16-23 of the 48bit result. The top bit is used to round the two byte result.
-// note that the lower two bytes and the upper byte of the 48bit result are not calculated.
-// this can cause the result to be out by one as the lower bytes may cause carries into the upper ones.
-// B0 A0 are bits 24-39 and are the returned value
-// C1 B1 A1 is longIn1
-// D2 C2 B2 A2 is longIn2
-//
-#define MultiU24X32toH16(intRes, longIn1, longIn2) \
-  asm volatile ( \
+  // intRes = longIn1 * longIn2 >> 24
+  // uses:
+  // r26 to store 0
+  // r27 to store bits 16-23 of the 48bit result. The top bit is used to round the two byte result.
+  // note that the lower two bytes and the upper byte of the 48bit result are not calculated.
+  // this can cause the result to be out by one as the lower bytes may cause carries into the upper ones.
+  // B0 A0 are bits 24-39 and are the returned value
+  // C1 B1 A1 is longIn1
+  // D2 C2 B2 A2 is longIn2
+  //
+  #define MultiU24X32toH16(intRes, longIn1, longIn2) \
+    asm volatile ( \
                  "clr r26 \n\t" \
                  "mul %A1, %B2 \n\t" \
                  "mov r27, r1 \n\t" \
@@ -240,10 +283,7 @@ volatile signed char count_direction[NUM_AXIS] = { 1, 1, 1, 1 };
                  "r26" , "r27" \
                )
 
-// Some useful constants
-
-#define ENABLE_STEPPER_DRIVER_INTERRUPT()  TIMSK1 |= BIT(OCIE1A)
-#define DISABLE_STEPPER_DRIVER_INTERRUPT() TIMSK1 &= ~BIT(OCIE1A)
+#endif // SAMD or AVR
 
 void endstops_hit_on_purpose() {
   endstop_hit_bits = 0;
@@ -1027,37 +1067,50 @@ void st_init() {
     E_AXIS_INIT(3);
   #endif
 
-  // waveform generation = 0100 = CTC
-  TCCR1B &= ~BIT(WGM13);
-  TCCR1B |=  BIT(WGM12);
-  TCCR1A &= ~BIT(WGM11);
-  TCCR1A &= ~BIT(WGM10);
+  #ifdef ARDUINO_ARCH_SAMD
 
-  // output mode = 00 (disconnected)
-  TCCR1A &= ~(3 << COM1A0);
-  TCCR1A &= ~(3 << COM1B0);
-  // Set the timer pre-scaler
-  // Generally we use a divider of 8, resulting in a 2MHz timer
-  // frequency on a 16MHz MCU. If you are going to change this, be
-  // sure to regenerate speed_lookuptable.h with
-  // create_speed_lookuptable.py
-  TCCR1B = (TCCR1B & ~(0x07 << CS10)) | (2 << CS10);
+    initStepperTimer();
+    stepperSetResolution(0,STEP_DRIVER_RESOLUTION,STEP_DRIVER_TYPE);
+    stepperSetResolution(1,STEP_DRIVER_RESOLUTION,STEP_DRIVER_TYPE);
+    stepperSetResolution(2,STEP_DRIVER_RESOLUTION,STEP_DRIVER_TYPE);
+    stepperSetResolution(3,STEP_DRIVER_RESOLUTION,STEP_DRIVER_TYPE);
+    
+  #else // AVR
 
-  OCR1A = 0x4000;
-  TCNT1 = 0;
-  ENABLE_STEPPER_DRIVER_INTERRUPT();
+    // waveform generation = 0100 = CTC
+    TCCR1B &= ~BIT(WGM13);
+    TCCR1B |=  BIT(WGM12);
+    TCCR1A &= ~BIT(WGM11);
+    TCCR1A &= ~BIT(WGM10);
 
-  #if ENABLED(ADVANCE)
-    #if defined(TCCR0A) && defined(WGM01)
-      TCCR0A &= ~BIT(WGM01);
-      TCCR0A &= ~BIT(WGM00);
-    #endif
-    e_steps[0] = e_steps[1] = e_steps[2] = e_steps[3] = 0;
-    TIMSK0 |= BIT(OCIE0A);
-  #endif //ADVANCE
+    // output mode = 00 (disconnected)
+    TCCR1A &= ~(3 << COM1A0);
+    TCCR1A &= ~(3 << COM1B0);
+    // Set the timer pre-scaler
+    // Generally we use a divider of 8, resulting in a 2MHz timer
+    // frequency on a 16MHz MCU. If you are going to change this, be
+    // sure to regenerate speed_lookuptable.h with
+    // create_speed_lookuptable.py
+    TCCR1B = (TCCR1B & ~(0x07 << CS10)) | (2 << CS10);
+
+    OCR1A = 0x4000;
+    TCNT1 = 0;
+    ENABLE_STEPPER_DRIVER_INTERRUPT();
+
+    #if ENABLED(ADVANCE)
+      #if defined(TCCR0A) && defined(WGM01)
+        TCCR0A &= ~BIT(WGM01);
+        TCCR0A &= ~BIT(WGM00);
+      #endif
+      e_steps[0] = e_steps[1] = e_steps[2] = e_steps[3] = 0;
+      TIMSK0 |= BIT(OCIE0A);
+    #endif //ADVANCE
+
+  #endif // SAMD or AVR
 
   enable_endstops(true); // Start with endstops active. After homing they can be disabled
-  sei();
+
+  SEI();
 
   set_stepper_direction(); // Init directions to out_bits = 0
 }

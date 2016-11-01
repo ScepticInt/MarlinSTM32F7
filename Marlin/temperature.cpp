@@ -37,7 +37,11 @@
 #endif
 
 #if ENABLED(PIDTEMPBED) || ENABLED(PIDTEMP)
-  #define PID_dT ((OVERSAMPLENR * 12.0)/(F_CPU / 64.0 / 256.0))
+  #ifdef ARDUINO_ARCH_SAMD
+    #define PID_dT ((OVERSAMPLENR * 12.0)/1000.0)
+  #else // AVR
+    #define PID_dT ((OVERSAMPLENR * 12.0)/(F_CPU / 64.0 / 256.0))
+  #endif
 #endif
 
 //===========================================================================
@@ -920,54 +924,62 @@ void tp_init() {
 
   #endif //HEATER_0_USES_MAX6675
 
-  #ifdef DIDR2
-    #define ANALOG_SELECT(pin) do{ if (pin < 8) DIDR0 |= BIT(pin); else DIDR2 |= BIT(pin - 8); }while(0)
-  #else
-    #define ANALOG_SELECT(pin) do{ DIDR0 |= BIT(pin); }while(0)
-  #endif
+  #ifdef ARDUINO_ARCH_SAMD
 
-  // Set analog inputs
-  ADCSRA = BIT(ADEN) | BIT(ADSC) | BIT(ADIF) | 0x07;
-  DIDR0 = 0;
-  #ifdef DIDR2
-    DIDR2 = 0;
-  #endif
-  #if HAS_TEMP_0
-    ANALOG_SELECT(TEMP_0_PIN);
-  #endif
-  #if HAS_TEMP_1
-    ANALOG_SELECT(TEMP_1_PIN);
-  #endif
-  #if HAS_TEMP_2
-    ANALOG_SELECT(TEMP_2_PIN);
-  #endif
-  #if HAS_TEMP_3
-    ANALOG_SELECT(TEMP_3_PIN);
-  #endif
-  #if HAS_TEMP_BED
-    ANALOG_SELECT(TEMP_BED_PIN);
-  #endif
-  #if HAS_FILAMENT_SENSOR
-    ANALOG_SELECT(FILWIDTH_PIN);
-  #endif
+    tempInit();
 
-  #if HAS_AUTO_FAN_0
-    pinMode(EXTRUDER_0_AUTO_FAN_PIN, OUTPUT);
-  #endif
-  #if HAS_AUTO_FAN_1 && (EXTRUDER_1_AUTO_FAN_PIN != EXTRUDER_0_AUTO_FAN_PIN)
-    pinMode(EXTRUDER_1_AUTO_FAN_PIN, OUTPUT);
-  #endif
-  #if HAS_AUTO_FAN_2 && (EXTRUDER_2_AUTO_FAN_PIN != EXTRUDER_0_AUTO_FAN_PIN) && (EXTRUDER_2_AUTO_FAN_PIN != EXTRUDER_1_AUTO_FAN_PIN)
-    pinMode(EXTRUDER_2_AUTO_FAN_PIN, OUTPUT);
-  #endif
-  #if HAS_AUTO_FAN_3 && (EXTRUDER_3_AUTO_FAN_PIN != EXTRUDER_0_AUTO_FAN_PIN) && (EXTRUDER_3_AUTO_FAN_PIN != EXTRUDER_1_AUTO_FAN_PIN) && (EXTRUDER_3_AUTO_FAN_PIN != EXTRUDER_2_AUTO_FAN_PIN)
-    pinMode(EXTRUDER_3_AUTO_FAN_PIN, OUTPUT);
-  #endif
+  #else // AVR
 
-  // Use timer0 for temperature measurement
-  // Interleave temperature interrupt with millies interrupt
-  OCR0B = 128;
-  TIMSK0 |= BIT(OCIE0B);
+    #ifdef DIDR2
+      #define ANALOG_SELECT(pin) do{ if (pin < 8) DIDR0 |= BIT(pin); else DIDR2 |= BIT(pin - 8); }while(0)
+    #else
+      #define ANALOG_SELECT(pin) do{ DIDR0 |= BIT(pin); }while(0)
+    #endif
+
+    // Set analog inputs
+    ADCSRA = BIT(ADEN) | BIT(ADSC) | BIT(ADIF) | 0x07;
+    DIDR0 = 0;
+    #ifdef DIDR2
+      DIDR2 = 0;
+    #endif
+    #if HAS_TEMP_0
+      ANALOG_SELECT(TEMP_0_PIN);
+    #endif
+    #if HAS_TEMP_1
+      ANALOG_SELECT(TEMP_1_PIN);
+    #endif
+    #if HAS_TEMP_2
+      ANALOG_SELECT(TEMP_2_PIN);
+    #endif
+    #if HAS_TEMP_3
+      ANALOG_SELECT(TEMP_3_PIN);
+    #endif
+    #if HAS_TEMP_BED
+      ANALOG_SELECT(TEMP_BED_PIN);
+    #endif
+    #if HAS_FILAMENT_SENSOR
+      ANALOG_SELECT(FILWIDTH_PIN);
+    #endif
+
+    #if HAS_AUTO_FAN_0
+      pinMode(EXTRUDER_0_AUTO_FAN_PIN, OUTPUT);
+    #endif
+    #if HAS_AUTO_FAN_1 && (EXTRUDER_1_AUTO_FAN_PIN != EXTRUDER_0_AUTO_FAN_PIN)
+      pinMode(EXTRUDER_1_AUTO_FAN_PIN, OUTPUT);
+    #endif
+    #if HAS_AUTO_FAN_2 && (EXTRUDER_2_AUTO_FAN_PIN != EXTRUDER_0_AUTO_FAN_PIN) && (EXTRUDER_2_AUTO_FAN_PIN != EXTRUDER_1_AUTO_FAN_PIN)
+      pinMode(EXTRUDER_2_AUTO_FAN_PIN, OUTPUT);
+    #endif
+    #if HAS_AUTO_FAN_3 && (EXTRUDER_3_AUTO_FAN_PIN != EXTRUDER_0_AUTO_FAN_PIN) && (EXTRUDER_3_AUTO_FAN_PIN != EXTRUDER_1_AUTO_FAN_PIN) && (EXTRUDER_3_AUTO_FAN_PIN != EXTRUDER_2_AUTO_FAN_PIN)
+      pinMode(EXTRUDER_3_AUTO_FAN_PIN, OUTPUT);
+    #endif
+
+    // Use timer0 for temperature measurement
+    // Interleave temperature interrupt with millies interrupt
+    OCR0B = 128;
+    TIMSK0 |= BIT(OCIE0B);
+
+  #endif // SAMD or AVR
 
   // Wait for temperature measurement to settle
   delay(250);
@@ -1259,8 +1271,13 @@ static void set_current_temp_raw() {
  *  - Check new temperature values for MIN/MAX errors
  *  - Step the babysteps value for each axis towards 0
  */
-ISR(TIMER0_COMPB_vect) {
-
+#ifdef ARDUINO_ARCH_SAMD
+  extern "C" {
+  int sysTickHook(void)
+#else // AVR
+  ISR(TIMER0_COMPB_vect)
+#endif
+{
   static unsigned char temp_count = 0;
   static TempState temp_state = StartupDelay;
   static unsigned char pwm_count = BIT(SOFT_PWM_SCALE);
@@ -1456,25 +1473,43 @@ ISR(TIMER0_COMPB_vect) {
 
   #endif // SLOW_PWM_HEATERS
 
-  #define SET_ADMUX_ADCSRA(pin) ADMUX = BIT(REFS0) | (pin & 0x07); ADCSRA |= BIT(ADSC)
-  #ifdef MUX5
-    #define START_ADC(pin) if (pin > 7) ADCSRB = BIT(MUX5); else ADCSRB = 0; SET_ADMUX_ADCSRA(pin)
-  #else
-    #define START_ADC(pin) ADCSRB = 0; SET_ADMUX_ADCSRA(pin)
+  #ifdef ARDUINO_ARCH_SAMD
+    #define ADC_RESULT ADC->RESULT.reg
+    #define START_ADC(CHANNEL) do{ \
+      ADC->INPUTCTRL.bit.MUXPOS = ADC_Channel##CHANNEL; \
+	  ADC->SWTRIG.bit.START = 1; \
+	} while(0)
+  #else // AVR
+    #define SET_ADMUX_ADCSRA(pin) ADMUX = BIT(REFS0) | (pin & 0x07); ADCSRA |= BIT(ADSC)
+    #define ADC_RESULT ADC
+    #ifdef MUX5
+      #define START_ADC(pin) if (pin > 7) ADCSRB = BIT(MUX5); else ADCSRB = 0; SET_ADMUX_ADCSRA(pin)
+    #else
+      #define START_ADC(pin) ADCSRB = 0; SET_ADMUX_ADCSRA(pin)
+    #endif
   #endif
 
   // Prepare or measure a sensor, each one every 12th frame
   switch (temp_state) {
     case PrepareTemp_0:
       #if HAS_TEMP_0
-        START_ADC(TEMP_0_PIN);
+        #ifdef ARDUINO_ARCH_SAMD
+          static bool isTempInit = false;
+          if (!isTempInit) {
+            isTempInit = true;
+            tempInit();
+          }
+          START_ADC(5);
+        #else // AVR
+          START_ADC(TEMP_0_PIN);
+        #endif
       #endif
       lcd_buttons_update();
       temp_state = MeasureTemp_0;
       break;
     case MeasureTemp_0:
       #if HAS_TEMP_0
-        raw_temp_value[0] += ADC;
+        raw_temp_value[0] += ADC_RESULT;
       #endif
       temp_state = PrepareTemp_BED;
       break;
@@ -1488,7 +1523,7 @@ ISR(TIMER0_COMPB_vect) {
       break;
     case MeasureTemp_BED:
       #if HAS_TEMP_BED
-        raw_temp_bed_value += ADC;
+        raw_temp_bed_value += ADC_RESULT;
       #endif
       temp_state = PrepareTemp_1;
       break;
@@ -1502,7 +1537,7 @@ ISR(TIMER0_COMPB_vect) {
       break;
     case MeasureTemp_1:
       #if HAS_TEMP_1
-        raw_temp_value[1] += ADC;
+        raw_temp_value[1] += ADC_RESULT;
       #endif
       temp_state = PrepareTemp_2;
       break;
@@ -1516,7 +1551,7 @@ ISR(TIMER0_COMPB_vect) {
       break;
     case MeasureTemp_2:
       #if HAS_TEMP_2
-        raw_temp_value[2] += ADC;
+        raw_temp_value[2] += ADC_RESULT;
       #endif
       temp_state = PrepareTemp_3;
       break;
@@ -1530,7 +1565,7 @@ ISR(TIMER0_COMPB_vect) {
       break;
     case MeasureTemp_3:
       #if HAS_TEMP_3
-        raw_temp_value[3] += ADC;
+        raw_temp_value[3] += ADC_RESULT;
       #endif
       temp_state = Prepare_FILWIDTH;
       break;
@@ -1544,8 +1579,8 @@ ISR(TIMER0_COMPB_vect) {
       break;
     case Measure_FILWIDTH:
       #if HAS_FILAMENT_SENSOR
-        // raw_filwidth_value += ADC;  //remove to use an IIR filter approach
-        if (ADC > 102) { //check that ADC is reading a voltage > 0.5 volts, otherwise don't take in the data.
+        // raw_filwidth_value += ADC_RESULT;  //remove to use an IIR filter approach
+        if (ADC_RESULT > 102) { //check that ADC is reading a voltage > 0.5 volts, otherwise don't take in the data.
           raw_filwidth_value -= (raw_filwidth_value >> 7); //multiply raw_filwidth_value by 127/128
           raw_filwidth_value += ((unsigned long)ADC << 7); //add new ADC reading
         }
@@ -1644,6 +1679,9 @@ ISR(TIMER0_COMPB_vect) {
     }
   #endif //BABYSTEPPING
 }
+#ifdef ARDUINO_ARCH_SAMD
+  } // extern "C"
+#endif
 
 #if ENABLED(PIDTEMP)
   // Apply the scale factors to the PID values

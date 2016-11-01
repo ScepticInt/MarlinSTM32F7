@@ -363,4 +363,10 @@
   #error ENABLE_AUTO_BED_LEVELING deprecated - use AUTO_BED_LEVELING_FEATURE instead
 #endif
 
+#ifdef ARDUINO_ARCH_SAMD
+  #if ENABLED(EEPROM)
+    #error "EEPROM is incompatible with ZeroPi."
+  #endif
+#endif
+
 #endif //SANITYCHECK_H

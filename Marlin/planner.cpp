@@ -252,7 +252,7 @@ void planner_reverse_pass() {
   //Make a local copy of block_buffer_tail, because the interrupt can alter it
   CRITICAL_SECTION_START;
     unsigned char tail = block_buffer_tail;
-  CRITICAL_SECTION_END
+  CRITICAL_SECTION_END;
 
   if (BLOCK_MOD(block_buffer_head - tail + BLOCK_BUFFER_SIZE) > 3) { // moves queued
     block_index = BLOCK_MOD(block_buffer_head - 3);
@@ -878,7 +878,12 @@ float junction_deviation = 0.1;
 
   block->acceleration_st = acc_st;
   block->acceleration = acc_st / steps_per_mm;
-  block->acceleration_rate = (long)(acc_st * 16777216.0 / (F_CPU / 8.0));
+
+  #ifndef STEPPER_TIMER_CLK
+    #define STEPPER_TIMER_CLK (F_CPU / 8.0)
+  #endif
+
+  block->acceleration_rate = (long)(acc_st * 16777216.0 / (STEPPER_TIMER_CLK));
 
   #if 0  // Use old jerk for now
     // Compute path unit vector

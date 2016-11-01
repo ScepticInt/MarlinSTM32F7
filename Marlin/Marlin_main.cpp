@@ -643,14 +643,16 @@ void setup() {
   SERIAL_PROTOCOLLNPGM("start");
   SERIAL_ECHO_START;
 
-  // Check startup - does nothing if bootloader sets MCUSR to 0
-  byte mcu = MCUSR;
-  if (mcu & 1) SERIAL_ECHOLNPGM(MSG_POWERUP);
-  if (mcu & 2) SERIAL_ECHOLNPGM(MSG_EXTERNAL_RESET);
-  if (mcu & 4) SERIAL_ECHOLNPGM(MSG_BROWNOUT_RESET);
-  if (mcu & 8) SERIAL_ECHOLNPGM(MSG_WATCHDOG_RESET);
-  if (mcu & 32) SERIAL_ECHOLNPGM(MSG_SOFTWARE_RESET);
-  MCUSR = 0;
+  #ifndef ARDUINO_ARCH_SAMD
+    // Check startup - does nothing if bootloader sets MCUSR to 0
+    byte mcu = MCUSR;
+    if (mcu & 1) SERIAL_ECHOLNPGM(MSG_POWERUP);
+    if (mcu & 2) SERIAL_ECHOLNPGM(MSG_EXTERNAL_RESET);
+    if (mcu & 4) SERIAL_ECHOLNPGM(MSG_BROWNOUT_RESET);
+    if (mcu & 8) SERIAL_ECHOLNPGM(MSG_WATCHDOG_RESET);
+    if (mcu & 32) SERIAL_ECHOLNPGM(MSG_SOFTWARE_RESET);
+    MCUSR = 0;
+  #endif
 
   SERIAL_ECHOPGM(MSG_MARLIN);
   SERIAL_ECHOLNPGM(" " SHORT_BUILD_VERSION);
@@ -7072,7 +7074,8 @@ void kill(const char* lcd_msg) {
     UNUSED(lcd_msg);
   #endif
 
-  cli(); // Stop interrupts
+  CLI();
+
   disable_all_heaters();
   disable_all_steppers();
 
@@ -7084,9 +7087,13 @@ void kill(const char* lcd_msg) {
   SERIAL_ERRORLNPGM(MSG_ERR_KILLED);
 
   // FMC small patch to update the LCD before ending
-  sei();   // enable interrupts
+
+  SEI();
+
   for (int i = 5; i--; lcd_update()) delay(200); // Wait a short time
-  cli();   // disable interrupts
+
+  CLI();
+
   suicide();
   while (1) { /* Intentionally left empty */ } // Wait for reset
 }

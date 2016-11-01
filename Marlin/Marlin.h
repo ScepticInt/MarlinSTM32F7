@@ -16,10 +16,14 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include <util/delay.h>
-#include <avr/pgmspace.h>
-#include <avr/eeprom.h>
-#include <avr/interrupt.h>
+#ifdef ARDUINO_ARCH_SAMD
+  #include "ZeroPi.h"
+#else // AVR
+  #include <util/delay.h>
+  #include <avr/pgmspace.h>
+  #include <avr/eeprom.h>
+  #include <avr/interrupt.h>
+#endif
 
 
 #include "fastio.h"
@@ -244,8 +248,17 @@ inline void refresh_cmd_timeout() { previous_cmd_ms = millis(); }
 #endif
 
 #ifndef CRITICAL_SECTION_START
-  #define CRITICAL_SECTION_START  unsigned char _sreg = SREG; cli();
-  #define CRITICAL_SECTION_END    SREG = _sreg;
+  #ifdef ARDUINO_ARCH_SAMD
+    #define CLI() noInterrupts()
+    #define SEI() interrupts()
+    #define CRITICAL_SECTION_START  CLI()
+    #define CRITICAL_SECTION_END    SEI()
+  #else // AVR
+    #define CLI() cli()
+    #define SEI() sei()
+    #define CRITICAL_SECTION_START  unsigned char _sreg = SREG; CLI()
+    #define CRITICAL_SECTION_END    SREG = _sreg
+  #endif
 #endif
 
 extern bool axis_relative_modes[];

@@ -2,6 +2,7 @@
   This code contributed by Triffid_Hunter and modified by Kliment
   why double up on these macros? see http://gcc.gnu.org/onlinedocs/cpp/Stringification.html
 */
+#ifndef ARDUINO_ARCH_SAMD
 
 #ifndef _FASTIO_ARDUINO_H
 #define _FASTIO_ARDUINO_H
@@ -4020,3 +4021,5 @@
 #endif
 
 #endif /* _FASTIO_ARDUINO_H */
+
+#endif // !ARDUINO_ARCH_SAMD

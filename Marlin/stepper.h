@@ -24,6 +24,37 @@
 #include "planner.h"
 #include "stepper_indirection.h"
 
+#ifdef ARDUINO_ARCH_SAMD
+
+  #define STEPPER_TIMER                       TC5
+  #define STEPPER_TIMER_ID                    GCM_TC4_TC5
+  #define STEPPER_TIMER_IRQ                   TC5_IRQn
+  #define ENABLE_STEPPER_DRIVER_INTERRUPT()   NVIC_EnableIRQ(TC5_IRQn)
+  #define DISABLE_STEPPER_DRIVER_INTERRUPT()  NVIC_DisableIRQ(TC5_IRQn)
+  #define STEPPER_TIMER_ISR()                 void TC5_Handler()
+  #define STEPPER_TIMER_OCR                   TC5->COUNT16.CC[0].reg
+  #define STEPPER_TIMER_CNT                   TC5->COUNT16.COUNT.reg
+  #define	STEPPER_TIMER_CLK                   2000000UL
+
+  #define ADVANCE_STEPPER_TIMER                       TC4
+  #define ADVANCE_STEPPER_TIMER_ID                    GCM_TC4_TC5
+  #define ADVANCE_STEPPER_TIMER_IRQ                   TC4_IRQn
+  #define ENABLE_ADVANCE_STEPPER_DRIVER_INTERRUPT()   NVIC_EnableIRQ(TC4_IRQn)
+  #define DISABLE_ADVANCE_STEPPER_DRIVER_INTERRUPT()  NVIC_DisableIRQ(TC4_IRQn)
+  #define ADVANCE_STEPPER_TIMER_ISR()                 void TC4_Handler()
+  #define ADVANCE_STEPPER_TIMER_OCR                   TC4->COUNT16.CC[0].reg
+  #define	ADVANCE_STEPPER_TIMER_CLK                   10000UL //10kHz
+
+#else // AVR
+
+  #define ENABLE_STEPPER_DRIVER_INTERRUPT()   TIMSK1 |= (1<<OCIE1A)
+  #define DISABLE_STEPPER_DRIVER_INTERRUPT()  TIMSK1 &= ~(1<<OCIE1A)
+  #define STEPPER_TIMER_ISR()                 ISR(TIMER1_COMPA_vect)
+  #define STEPPER_TIMER_OCR                   OCR1A //Output Compare Register
+  #define STEPPER_TIMER_CNT                   TCNT1
+
+#endif // SAMD or AVR
+
 #if EXTRUDERS > 3
   #define E_STEP_WRITE(v) { if(current_block->active_extruder == 3) { E3_STEP_WRITE(v); } else { if(current_block->active_extruder == 2) { E2_STEP_WRITE(v); } else { if(current_block->active_extruder == 1) { E1_STEP_WRITE(v); } else { E0_STEP_WRITE(v); }}}}
   #define NORM_E_DIR() { if(current_block->active_extruder == 3) { E3_DIR_WRITE( !INVERT_E3_DIR); } else { if(current_block->active_extruder == 2) { E2_DIR_WRITE(!INVERT_E2_DIR); } else { if(current_block->active_extruder == 1) { E1_DIR_WRITE(!INVERT_E1_DIR); } else { E0_DIR_WRITE(!INVERT_E0_DIR); }}}}

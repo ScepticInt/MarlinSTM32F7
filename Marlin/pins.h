@@ -128,6 +128,8 @@
   #include "pins_MEGACONTROLLER.h"
 #elif MB(99)
   #include "pins_99.h"
+#elif MB(ZEROPI)
+  #include "pins_ZEROPI.h"
 #else
   #error Unknown MOTHERBOARD value set in Configuration.h
 #endif
