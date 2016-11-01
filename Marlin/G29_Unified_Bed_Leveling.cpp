@@ -1206,7 +1206,7 @@ void restore_UBL_active_state_and_leave()
 // good to have the extra information.   Soon... we prune this to just a few items
 //
 void G29_What_Command() {
-    int k;
+    int i, k;
     k = E2END - Unified_Bed_Leveling_EEPROM_start;
     Statistics_Flag++;
 
@@ -1241,6 +1241,20 @@ void G29_What_Command() {
     SERIAL_ECHOPGM("z_offset: ");
     SERIAL_ECHO_F( blm.state.z_offset, 6 );
     SERIAL_PROTOCOLPGM("  ------------------------------------------------------------       <----<<< \n");
+
+    SERIAL_PROTOCOLPGM("X-Axis Mesh Points at: ");
+    for(i=0; i<MESH_NUM_X_POINTS; i++ ) {			
+    	SERIAL_PROTOCOL_F( blm.map_x_index_to_bed_location(i),1 );
+    	SERIAL_PROTOCOLPGM("  ");
+    }
+    SERIAL_PROTOCOLPGM("\n");
+
+    SERIAL_PROTOCOLPGM("Y-Axis Mesh Points at: ");
+    for(i=0; i<MESH_NUM_Y_POINTS; i++ ) {			
+    	SERIAL_PROTOCOL_F( blm.map_y_index_to_bed_location(i),1 );
+    	SERIAL_PROTOCOLPGM("  ");
+    }
+    SERIAL_PROTOCOLPGM("\n");
 
     SERIAL_ECHOPAIRPGM("Kill pin on :", KILL_PIN );
     SERIAL_ECHOPAIRPGM("  state:", digitalRead(KILL_PIN ) );
