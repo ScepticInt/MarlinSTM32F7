@@ -64,7 +64,7 @@ Marlin is published under the [GPL license](/LICENSE) because we believe in open
       A     Activate  Activate the Unified Bed Leveling system.  
 
       B #   Business  Use the 'Business Card' mode of the Manual Probe subsystem.  This is invoked as
-      		      G29 P2 B   The mode of G29 P2 allows you to use a bussiness card or recipe card
+      	      G29 P2 B   The mode of G29 P2 allows you to use a bussiness card or recipe card
 		      as a shim that the nozzle will pinch as it is lowered.   The idea is that you 
 		      can easily feel the nozzle getting to the same height by the amount of resistance
 		      the business card exhibits to movement.   You should try to achieve the same amount
