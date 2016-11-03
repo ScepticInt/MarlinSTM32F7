@@ -57,141 +57,143 @@ Marlin is published under the [GPL license](/LICENSE) because we believe in open
 
 ## G29 Parameters
 
-    G29: Mesh Based Compensation System
+     G29: Mesh Based Compensation System
 
      Parameters understood by this leveling system:
 
-      A     Activate    Activate the Unified Bed Leveling system.
+      A     Activate  Activate the Unified Bed Leveling system.  
 
-      B #   Business    Use the 'Business Card' mode of the Manual Probe subsystem.  This is invoked as
-                    G29 P2 B   The mode of G29 P2 allows you to use a bussiness card or recipe card
-                    as a shim that the nozzle will pinch as it is lowered.   The idea is that you
-                    can easily feel the nozzle getting to the same height by the amount of resistance
-                    the business card exhibits to movement.   You should try to achieve the same amount
-                    of resistance on each probed point to facilitate accurate and repeatable measurements.
-                    You should be very careful not to drive the nozzle into the bussiness card with a
-                    lot of force as it is very possible to cause damage to your printer if your are
-                    careless.  If you use the B option with G29 P2 B you can leave the number parameter off
-                    on its first use to enable measurement of the business card thickness.  Subsequent usage
-                    of the B parameter can have the number previously measured supplied to the command.
-                    Incidently, you are much better off using something like a Spark Gap feeler gauge than
-                    something that compresses like a Business Card.
+      B #   Business  Use the 'Business Card' mode of the Manual Probe subsystem.  This is invoked as
+      		      G29 P2 B   The mode of G29 P2 allows you to use a bussiness card or recipe card
+		      as a shim that the nozzle will pinch as it is lowered.   The idea is that you 
+		      can easily feel the nozzle getting to the same height by the amount of resistance
+		      the business card exhibits to movement.   You should try to achieve the same amount
+		      of resistance on each probed point to facilitate accurate and repeatable measurements.
+		      You should be very careful not to drive the nozzle into the bussiness card with a 
+		      lot of force as it is very possible to cause damage to your printer if your are
+		      careless.  If you use the B option with G29 P2 B you can leave the number parameter off
+		      on its first use to enable measurement of the business card thickness.  Subsequent usage
+		      of the B parameter can have the number previously measured supplied to the command.
+		      Incidently, you are much better off using something like a Spark Gap feeler gauge than
+		      something that compresses like a Business Card. 
 
-     C     Continue Continue, Card or Current Location.   This is not a primary command.  C is used to
-              further refine the behaviour of several other commands.  Issuing a G29 P1 C will
-                    continue the generation of a partially constructed Mesh without invalidating what has
-                    been done.  Issuing a G29 P2 C will tell the Manual Probe subsystem to use the current
-                    location in its search for the closest unmeasured Mesh Point.  When used with a G29 Z C
-                    it indicates to use the current location instead of defaulting to the center of the print bed.
+      C     Continue  Continue, Constant, Current Location.   This is not a primary command.  C is used to 
+      		      further refine the behaviour of several other commands.  Issuing a G29 P1 C will 
+		      continue the generation of a partially constructed Mesh without invalidating what has 
+		      been done.  Issuing a G29 P2 C will tell the Manual Probe subsystem to use the current
+		      location in its search for the closest unmeasured Mesh Point.  When used with a G29 Z C 
+		      it indicates to use the current location instead of defaulting to the center of the print bed.
 
-      D     Disable     Disable the Unified Bed Leveling system.
+      D     Disable   Disable the Unified Bed Leveling system.  
 
-      F #   Fade        Fade the amount of Mesh Based Compensation over a specified height.  At the specified height,
-                    no correction is applied and natural printer kenimatics take over.  If no number is specified
-                    for the command, 10mm is assummed to be reasonable.
+      E     Export    Export the active Mesh being used by the system.  The text generated can be saved and later
+                      sent by PronterFace or Repetier Host to reconstruct the current mesh on another machine.
 
-      G #   Grid        Perform a Grid Based Leveling of the current Mesh using a grid with n points on
-                  a side.
+      F #   Fade      Fade the amount of Mesh Based Compensation over a specified height.  At the specified height, 
+      		      no correction is applied and natural printer kenimatics take over.  If no number is specified 
+		      for the command, 10mm is assummed to be reasonable.
 
-      H #   Height      Specify the Height to raise the nozzle after each manual probe of the bed.  The
-                    default is 5mm.
+      G #   Grid      Perform a Grid Based Leveling of the current Mesh using a grid with n points on
+     		      a side.
 
-      I #   Invalidate  Invalidate specified number of Mesh Points.  The nozzle location is used unless
-                    the X and Y parameter are used.   If no number is specified, only the closest Mesh
-                    point to the location is invalidated.  The M parameter is available as well to produce
-                    a map after the operation.  This command is useful to invalidate a portion of the
-                    Mesh so it can be adjusted using other tools in the Unified Bed Leveling System.  When
-                    attempting to invalidate an isolated bad point in the mesh, the M option will indicate
-                    where the nozzle is positioned in the Mesh with (#).  You can move the nozzle around on
-                    the bed and use this feature to select the center of the area (or cell) you want to
-                    invalidate.
+      H #   Height    Specify the Height to raise the nozzle after each manual probe of the bed.  The
+      		      default is 5mm.  
 
-      K #   Kompare     Kompare current Mesh with stored Mesh # replacing current Mesh with the result.  This
-                        command litterly performs a difference between two Mesh.
+      I #   Invalidate Invalidate specified number of Mesh Points.  The nozzle location is used unless
+      		      the X and Y parameter are used.   If no number is specified, only the closest Mesh
+		      point to the location is invalidated.  The M parameter is available as well to produce 
+		      a map after the operation.  This command is useful to invalidate a portion of the 
+		      Mesh so it can be adjusted using other tools in the Unified Bed Leveling System.  When
+		      attempting to invalidate an isolated bad point in the mesh, the M option will indicate
+		      where the nozzle is positioned in the Mesh with (#).  You can move the nozzle around on
+		      the bed and use this feature to select the center of the area (or cell) you want to 
+		      invalidate.
 
-      L     Load        Load Mesh from the previously activated location in the EEPROM.
+      K #   Kompare   Kompare current Mesh with stored Mesh # replacing current Mesh with the result.  This
+                      command litterly performs a difference between two Mesh. 
 
-      L #   Load        Load Mesh from the specified location in the EEPROM.  Set this location as activated
-                        for subsequent Load and Store operations.
+      L     Load      Load Mesh from the previously activated location in the EEPROM.
 
-      O     Map         Display the Mesh Map Topology.  The parameter can be specified alone (ie. G29 O) or
-                    in combination with many of the other commands.  The Mesh Map option works with
-                    all of the Phase commands (ie. G29 P4 R 5 X 50 Y100 C -.1 O)  
+      L #   Load      Load Mesh from the specified location in the EEPROM.  Set this location as activated
+                      for subsequent Load and Store operations.
 
+      O     Map       Display the Mesh Map Topology.  
+		      The parameter can be specified alone (ie. G29 O) or in combination with many of the 
+		      other commands.  The Mesh Map option works with all of the Phase 
+		      commands (ie. G29 P4 R 5 X 50 Y100 C -.1 O) 
+
+      N    No Home    G29 normally insists that a G28 has been performed.  You can over rule this with an
+      		      N option.  In general, you should not do this.  This can only be done safely with
+		      commands that do not move the nozzle.
+	
 The P or Phase commands are used for the bulk of the work to setup a Mesh.  In general, your Mesh will
 start off being initialized with a G29 P0 or a G29 P1.   Further refinement of the Mesh happens with
 each additional Phase that processes it.
 
-      P0    Phase 0     Zero Mesh Data and turn off the Mesh Compensation System.  This reverts the
-                        Delta Printer to the same state it was in before the Delta Mesh Based Compensation
-                        System was turned on.  Setting the entire Mesh to Zero is a special case that allows
-                        a subsequent G or T leveling operation for backward compatability.
+      P0    Phase 0   Zero Mesh Data and turn off the Mesh Compensation System.  This reverts the
+                      3D Printer to the same state it was in before the Unified Bed Leveling Compensation
+                      was turned on.  Setting the entire Mesh to Zero is a special case that allows
+                      a subsequent G or T leveling operation for backward compatability.
 
-      P1    Phase 1     Invalidate entire Mesh and continue with automatic generation of the Mesh data using
-                        the Z-Probe.   Depending upon the values of DELTA_PROBEABLE_RADIUS and
-                        DELTA_PRINTABLE_RADIUS some area of the bed will not have Mesh Data automatically
-                        generated.  This will be handled in Phase 2.  If the Phase 1 command is given the
-                        C (Continue) parameter it does not invalidate the Mesh prior to automatically
-                        probing needed locations.  This allows you to invalidate portions of the Mesh but still
-                        use the automatic probing capabilities of the Unified Bed Leveling System.  An X and Y
-                        parameter can be given to prioritize where the command should be trying to measure points.
-                        If the X and Y parameters are not specified the current probe position is used.  Phase 1
-                        allows you to specify the M (Map) parameter so you can watch the generation of the Mesh.
-                        Phase 1 also watches for the LCD Panel's Encoder Switch being held in a depressed state.
-                        It will suspend generation of the Mesh if it sees the user request that.  (This check is
-                        only done between probe points.  You will need to press and hold the switch until the
-                        Phase 1 command can detect it.)
+      P1    Phase 1   Invalidate entire Mesh and continue with automatic generation of the Mesh data using
+                      the Z-Probe.   Depending upon the values of DELTA_PROBEABLE_RADIUS and
+                      DELTA_PRINTABLE_RADIUS some area of the bed will not have Mesh Data automatically
+                      generated.  This will be handled in Phase 2.  If the Phase 1 command is given the 
+		      C (Continue) parameter it does not invalidate the Mesh prior to automatically 
+		      probing needed locations.  This allows you to invalidate portions of the Mesh but still
+		      use the automatic probing capabilities of the Unified Bed Leveling System.  An X and Y
+		      parameter can be given to prioritize where the command should be trying to measure points.
+		      If the X and Y parameters are not specified the current probe position is used.  Phase 1
+		      allows you to specify the M (Map) parameter so you can watch the generation of the Mesh.
+		      Phase 1 also watches for the LCD Panel's Encoder Switch being held in a depressed state.
+		      It will suspend generation of the Mesh if it sees the user request that.  (This check is
+		      only done between probe points.  You will need to press and hold the switch until the
+		      Phase 1 command can detect it.)
 
-      P2    Phase 2     Probe areas of the Mesh that can not be automatically handled.  Phase 2 respects an H
-                  parameter to control the height between Mesh points.  The default height for movement
-                  between Mesh points is 5mm.  A smaller number can be used to make this part of the
-                  calibration less time consuming.  You will be running the nozzle down until it just barely
-                  touches the glass.  You should have the nozzle clean with no plastic obstructing your view.
-                  Use caution and move slowly.  It is possible to damage your printer if you are careless.
-                  Note that this command will use the configuration #define SIZE_OF_LITTLE_RAISE if the
-                  nozzle is moving a distance of less than BIG_RAISE_NOT_NEEDED.
+      P2    Phase 2   Probe areas of the Mesh that can not be automatically handled.  Phase 2 respects an H
+      		      parameter to control the height between Mesh points.  The default height for movement
+		      between Mesh points is 5mm.  A smaller number can be used to make this part of the 
+		      calibration less time consuming.  You will be running the nozzle down until it just barely 
+		      touches the glass.  You should have the nozzle clean with no plastic obstructing your view.  
+		      Use caution and move slowly.  It is possible to damage your printer if you are careless. 
+		      Note that this command will use the configuration #define SIZE_OF_LITTLE_RAISE if the 
+		      nozzle is moving a distance of less than BIG_RAISE_NOT_NEEDED. 
 
-                  The H parameter can be set negative if your Mesh dips in a large area.  You can press
-                  and hold the LCD Panel's encoder wheel to terminate the current Phase 2 command.  You
-                  can then re-issue the G29 P 2 command with an H parameter that is more suitable for the
-                  area you are manually probing.   Note that the command tries to start you in a corner
-                  of the bed where movement will be predictable.  You can force the location to be used in
-                  the distance calculations by using the X and Y parameters.  You may find it is helpful to
-                  print out a Mesh Map (G29 O ) to understand where the mesh is invalidated and where
-                  the nozzle will need to move in order to complete the command.    The C parameter is
-                  available on the Phase 2 command also and indicates the search for points to measure should
-                  be done based on the current location of the nozzle.
+		      The H parameter can be set negative if your Mesh dips in a large area.  You can press
+		      and hold the LCD Panel's encoder wheel to terminate the current Phase 2 command.  You
+		      can then re-issue the G29 P 2 command with an H parameter that is more suitable for the
+		      area you are manually probing.   Note that the command tries to start you in a corner
+		      of the bed where movement will be predictable.  You can force the location to be used in
+		      the distance calculations by using the X and Y parameters.  You may find it is helpful to
+		      print out a Mesh Map (G29 O ) to understand where the mesh is invalidated and where
+		      the nozzle will need to move in order to complete the command.    The C parameter is 
+		      available on the Phase 2 command also and indicates the search for points to measure should
+		      be done based on the current location of the nozzle.
 
-                  A B parameter is also available for this command and described up above.  It places the
-                  manual probe subsystem into Business Card mode where the thickness of a business care is
-                  measured and then used to accurately set the nozzle height in all manual probing for the
-                  duration of the command.  (S for Shim mode would be a better parameter name, but S is needed
-                  for Save or Store of the Mesh to EEPROM)  A Business card can be used, but you will have
-                  better results if you use a flexible Shim that does not compress very much.  That makes it
-                  easier for you to get the nozzle to press with similar amounts of force against the shim so you
-                  can get accurate measurements.  As you are starting to touch the nozzle against the shim try
-                  to get it to grasp the shim with the same force as when you measured the thickness of the
-                  shim at the start of the command.
+		      A B parameter is also available for this command and described up above.  It places the
+		      manual probe subsystem into Business Card mode where the thickness of a business care is
+		      measured and then used to accurately set the nozzle height in all manual probing for the 
+		      duration of the command.  (S for Shim mode would be a better parameter name, but S is needed 
+		      for Save or Store of the Mesh to EEPROM)  A Business card can be used, but you will have
+		      better results if you use a flexible Shim that does not compress very much.  That makes it 
+		      easier for you to get the nozzle to press with similar amounts of force against the shim so you 
+		      can get accurate measurements.  As you are starting to touch the nozzle against the shim try
+		      to get it to grasp the shim with the same force as when you measured the thickness of the
+		      shim at the start of the command.
 
-                  Phase 2 allows the M (Map) parameter to be specified.  This allows the user to watch the progression
-                  of the Mesh being built.
-                  
-                  It should be noted that Manually Probing the bed can take a lot of time.  The author of this
-                  software is not using the Manual Probe option very much any more.  Instead, the unprobed areas are 
-                  filled with a 'safe' value ( G29 P3 R C .5 ???) and then a G26 P C O2.0 is given to create a Mesh Validation
-                  pattern.   Using the Mesh Validation pattern you can then progress to G29 P4 R and edit Mesh Points
-                  that are not perfect.
+		      Phase 2 allows the O (Map) parameter to be specified.  This helps the user see the progression
+		      of the Mesh being built.
 
       P3    Phase 3   Fill the unpopulated regions of the Mesh with a fixed value.  The C parameter is used to
-                specify the Constant value to fill all invalid areas of the Mesh.  If no C parameter is
-                specified, a value of 0.0 is assumed.  The R parameter can be given to specify the number
-                of points to set.  If the R parameter is specified the current nozzle position is used to
-                find the closest points to alter unless the X and Y parameter are used to specify the fill
-                location.
+      		      specify the Constant value to fill all invalid areas of the Mesh.  If no C parameter is 
+		      specified, a value of 0.0 is assumed.  The R parameter can be given to specify the number 
+		      of points to set.  If the R parameter is specified the current nozzle position is used to 
+		      find the closest points to alter unless the X and Y parameter are used to specify the fill 
+		      location.
 
-      P4    Phase 4   Fine tune the Mesh.  The Unified Bed Leveling System assume the existance of
-                      an LCD Panel.  It well be possible to fine tune the mesh without the use of an LCD Panel
-                      soon.  (More work and details on doing this later!)
+      P4    Phase 4   Fine tune the Mesh.  The Delta Mesh Compensation System assume the existance of
+                      an LCD Panel.  It is possible to fine tune the mesh without the use of an LCD Panel.  
+		      (More work and details on doing this later!)
                       The System will search for the closest Mesh Point to the nozzle.  It will move the
                       nozzle to this location.  The user can use the LCD Panel to carefully adjust the nozzle
                       so it is just barely touching the bed.  When the user clicks the control, the System
@@ -202,41 +204,40 @@ each additional Phase that processes it.
                       can be requested to continue the adjustment of Mesh Points by using the R(epeat)
                       parameter.  If the Repetition count is not specified, it is assumed the user wishes
                       to adjust the entire matrix.  The nozzle is moved to the Mesh Point being edited.
-                      The command can be terminated early (or after the area of interest has been edited) by
-                      pressing and holding the encoder wheel until the system recognizes the exit request.
+		      The command can be terminated early (or after the area of interest has been edited) by
+		      pressing and holding the encoder wheel until the system recognizes the exit request.
                       Phase 4's general form is G29 P4 [R # of points] [X position] [Y position]
 
-                      Phase 4 is intended to be used with the G26 Mesh Validation Command.   Using the
-                      information left on the printer's bed from the G26 command it is very straight forward
-                      and easy to fine tune the Mesh.   One concept that is important to remember and that
-                      will make using the Phase 4 command easier to use is this:  You are editing the height of
-                      the nozzle at these locations.  If you have too little clearance and not much plastic 
-                      was extruded in an area, you want to RAISE the nozzle at this location.  If you did not 
-                      get good adheasion, you want to LOWER the nozzle at that location.
-                      
-                      Once you get comfortable with the command, you don't even need to look at the LCD Panel.
-                      As the System runs the nozzle around the bed, you can just click the Encoder Wheel if you
-                      like the situation at that location.  If you just want a minor change, a few clicks of the
-                      Encoder Wheel in the right direction are fast and easy to do.
+		      Phase 4 is intended to be used with the G26 Mesh Validation Command.   Using the 
+		      information left on the printer's bed from the G26 command it is very straight forward
+		      and easy to fine tune the Mesh.   One concept that is important to remember and that 
+		      will make using the Phase 4 command easy to use is this:  You are editing the Mesh Points.
+		      If you have too little clearance and not much plastic was extruded in an area, you want to
+		      LOWER the Mesh Point at the location.  If you did not get good adheasion, you want to
+		      RAISE the Mesh Point at that location.
 
 
-      P5    Phase 5   Adjust Mesh to mean height.  The Mesh is analyzed and the mean height of it is
-                calculated.   The Standard deviation of the points within the mesh are also
-                calculated.   With this information, the mesh is adjusted to have a mean of 0.0.
-                Probably, this operation should not be performed on a Mesh if more additions are
-                going to be made to it.  One of the primary reasons for doing this is to make the
-                Mesh Map easier to analyze and understand.   But it is also useful for the case where
-                your G28 homes the Z Axis at a place where the value is significantly different from
-                the bed's mean value.  (ie.  Most of your bed is more or less than your G28 value.)
+      P5    Phase 5   Find Mean Mesh Height and Standard Deviation.   Typically, it is easier to use and
+      		      work with the Mesh if it is Mean Adjusted.  You can specify a C parameter to 
+		      Correct the Mesh to a 0.00 Mean Height.   Adding a C parameter will automatically 
+		      execute a G29 P6 C <mean height>.   
+      
+      P6    Phase 6   Shift Mesh height.  The entire Mesh's height is adjusted by the height specified 
+      		      with the C parameter.  Being able to adjust the height of a Mesh is useful tool.  It
+		      can be used to compensate for poorly calibrated Z-Probes and other errors.  Ideally,
+		      you should have the Mesh adjusted for a Mean Height of 0.00 and the Z-Probe measuring
+		      0.000 at the Z Home location.
 
-      Q  #  Test      Load specified Test Pattern to assist in checking correct operation of system.  This
-                command is not anticipated to be of much value to the typical user.  It is intended
-                for developers to help them verify correct operation of the Unified Bed Leveling System.
+      Q     Test      Load specified Test Pattern to assist in checking correct operation of system.  This 
+      		      command is not anticipated to be of much value to the typical user.  It is intended
+		      for developers to help them verify correct operation of the Unified Bed Leveling System.
 
-      S     Store     Store the current Mesh in the Activated area of the EEPROM.
+      S     Store     Store the current Mesh in the Activated area of the EEPROM.  It will also store the 
+                      current state of the Unified Bed Leveling system in the EEPROM.
 
       S #   Store     Store the current Mesh at the specified location in EEPROM.  Activate this location
-                      for subsequent Load and Store operations.
+                      for subsequent Load and Store operations.  It will also store the current state of 
+		      the Unified Bed Leveling system in the EEPROM.
 
       T     3-Point   Perform a 3 Point Bed Leveling on the current Mesh
 
@@ -250,8 +251,28 @@ each additional Phase that processes it.
                       by just doing a G29 Z
 
       Z #   Zero      The entire Mesh can be raised or lowered to conform with the specified difference.  
-                      Z_PROBE_OFFSET_FROM_EXTRUDER is added to the calculation.  
+      		      zprobe_zoffset is added to the calculation.  
 
+
+     Release Notes:
+    			You MUST do a M502 & M500 pair of commands to initialize the storage.  Failure to do this
+    			will cause all kinds of problems.  Enabling EEPROM Storage is highly recommended.  With 
+			EEPROM Storage of the mesh, you are limited to 3-Point and Grid Leveling.  (G29 P0 T and 
+			G29 P0 G respectively.)
+
+			When you do a G28 and then a G29 P1 to automatically build your first mesh, you are going to notice
+			the Unified Bed Leveling probes points further and further away from the starting location. (The
+			starting location defaults to the center of the bed.)  	The original Grid and Mesh leveling used 
+			a Zig Zag pattern. The new pattern is better, especially for people with Delta printers.  This 
+			allows you to get the center area of the Mesh populated (and edited) quicker.   This allows you to 
+			perform a small print and check out your settings quicker.   You do not need to populate the 
+		       	entire mesh to use it.	(You don't want to spend a lot of time generating a mesh only to realize 
+			you don't have the resolution or zprobe_zoffset set correctly.  The Mesh generation
+			gathers points closest to where the nozzle is located unless you specify an (X,Y) coordinate pair.
+            
+			The foundation of this Bed Leveling System is built on Epatel's Mesh Bed Leveling code.  A big 
+			'Thanks!' to him and the creators of 3-Point and Grid Based leveling.   Combining thier contributions
+			we now have the functionality and features of all three systems combined.
 
 ## G26 Parameters
 ~~~~
