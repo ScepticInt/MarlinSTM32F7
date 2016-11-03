@@ -78,7 +78,7 @@ Marlin is published under the [GPL license](/LICENSE) because we believe in open
 		      something that compresses like a Business Card. 
 
       C     Continue  Continue, Constant, Current Location.   This is not a primary command.  C is used to 
-      		      further refine the behaviour of several other commands.  Issuing a G29 P1 C will 
+      	      further refine the behaviour of several other commands.  Issuing a G29 P1 C will 
 		      continue the generation of a partially constructed Mesh without invalidating what has 
 		      been done.  Issuing a G29 P2 C will tell the Manual Probe subsystem to use the current
 		      location in its search for the closest unmeasured Mesh Point.  When used with a G29 Z C 
