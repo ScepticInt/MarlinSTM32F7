@@ -60,7 +60,7 @@ Marlin is published under the [GPL license](/LICENSE) because we believe in open
      G29: Mesh Based Compensation System
 
      Parameters understood by this leveling system:
-
+```cpp
       A     Activate  Activate the Unified Bed Leveling system.  
 
       B #   Business  Use the 'Business Card' mode of the Manual Probe subsystem.  This is invoked as
@@ -252,7 +252,7 @@ each additional Phase that processes it.
 
       Z #   Zero      The entire Mesh can be raised or lowered to conform with the specified difference.  
       		      zprobe_zoffset is added to the calculation.  
-
+```
 
      Release Notes:
     			You MUST do a M502 & M500 pair of commands to initialize the storage.  Failure to do this
