@@ -1031,13 +1031,8 @@ float Total_Prime = 0.0;
 			destination[E_AXIS] += 0.25;
 #ifdef PREVENT_LENGTHY_EXTRUDE
 			Total_Prime += 0.25;
-			if (Total_Prime >= EXTRUDE_MAXLENGTH ) {
-#if HAS_TEMP_BED
-			  	thermalManager.setTargetBed( 0.0 );
-#endif
-				thermalManager.setTargetHotend( 0.0 , 0 );
+			if (Total_Prime >= EXTRUDE_MAXLENGTH ) 
 				return 1;
-  			}
 #endif
 			mesh_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], 
 //						planner.max_feedrate[E_AXIS]/(15.0), 0, 0xffff, 0xffff );
