@@ -1,6 +1,6 @@
 /*
  * Marlin Firmware -- G26 - Mesh Validation Tool
-*/
+ */
 
 /**
  * Marlin 3D Printer Firmware
@@ -142,7 +142,7 @@ bool parse_G26_parameters();
 void move_to( float, float, float, float);
 void print_line_from_here_to_there( float sx, float sy, float sz, float ex, float ey, float ez );
 bool turn_on_heaters();
-void prime_nozzle();
+int  prime_nozzle();
 void chirp_at_user();
 
 static unsigned circle_flags[16], horizontal_mesh_line_flags[16], vertical_mesh_line_flags[16], Continue_with_closest=0;
@@ -201,7 +201,8 @@ struct mesh_index_pair location;
   sync_plan_position_e();
 
   if (Prime_Flag)  
-	prime_nozzle();
+	if ( prime_nozzle() )			// if prime_nozzle() returns an error, we just bail out.
+		goto LEAVE;
   
 
 //
@@ -681,7 +682,6 @@ SERIAL_ECHO("\n");
 	destination[Z_AXIS] = z;	// We know the last_z==z or we wouldn't be in this block of code.
 	destination[E_AXIS] = current_position[E_AXIS];
 
-
   	mesh_buffer_line( destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], feed_value, 0 );
 
 	stepper.synchronize();
@@ -692,8 +692,8 @@ debug_current_and_destination(" in move_to() done with Z move");
 }
    }
 
-  if ( has_XY_component)  {				// Check if X or Y is involved in the movement.
-	feed_value = PLANNER_XY_FEEDRATE()/(10.0);	// Yes!  It is a 'normal' movement
+  if ( has_XY_component)  {					// Check if X or Y is involved in the movement.
+	feed_value = PLANNER_XY_FEEDRATE()/(10.0);		// Yes!  It is a 'normal' movement
   } else  {
 	feed_value = planner.max_feedrate[E_AXIS]/(1.5);	// it is just a retract() or un_retract()
   }
@@ -714,7 +714,6 @@ debug_current_and_destination(" in move_to() doing last move");
 
 if (G26_Debug_flag!=0) 
 debug_current_and_destination(" in move_to() after last move");
-
   stepper.synchronize();
   set_destination_to_current();
 }
@@ -797,7 +796,7 @@ if (G26_Debug_flag!=0) {
 SERIAL_ECHOPGM("  filament retracted.\n");
 }
 	}
-		move_to( sx, sy, sz, 0.0 );	// Get to the starting point with no extrusion
+	move_to( sx, sy, sz, 0.0 );	// Get to the starting point with no extrusion
 
 	E_Pos_Delta = Line_Length * G26_E_AXIS_feedrate * Extrusion_Multiplier;
 
@@ -1014,7 +1013,9 @@ bool turn_on_heaters() {
 // This block of code primes the nozzle if needed.
 //
 
-void prime_nozzle() {
+int prime_nozzle() {
+float Total_Prime = 0.0;
+
 	if ( Prime_Flag == -1 )  {	// The user wants to control how much filament gets purged
 		lcd_setstatus( "User Controled Prime", true);
 		chirp_at_user();
@@ -1028,6 +1029,16 @@ void prime_nozzle() {
 		while( !G29_lcd_clicked() ) {
 			chirp_at_user();
 			destination[E_AXIS] += 0.25;
+#ifdef PREVENT_LENGTHY_EXTRUDE
+			Total_Prime += 0.25;
+			if (Total_Prime >= EXTRUDE_MAXLENGTH ) {
+#if HAS_TEMP_BED
+			  	thermalManager.setTargetBed( 0.0 );
+#endif
+				thermalManager.setTargetHotend( 0.0 , 0 );
+				return 1;
+  			}
+#endif
 			mesh_buffer_line(destination[X_AXIS], destination[Y_AXIS], destination[Z_AXIS], destination[E_AXIS], 
 //						planner.max_feedrate[E_AXIS]/(15.0), 0, 0xffff, 0xffff );
 						planner.max_feedrate[E_AXIS]/(15.0), 0 );
@@ -1064,9 +1075,11 @@ void prime_nozzle() {
 		set_destination_to_current();
 		retract_filament();
 	  }
+	return 0;
 }
 
 #endif
+
 
 
 
