@@ -28,7 +28,9 @@
 
 #define OVERSAMPLENR 16
 
-#if (THERMISTORHEATER_0 == 1) || (THERMISTORHEATER_1 == 1)  || (THERMISTORHEATER_2 == 1) || (THERMISTORHEATER_3 == 1) || (THERMISTORBED == 1) //100k bed thermistor
+#define ANY_THERMISTOR_IS(n) (THERMISTORHEATER_0 == n || THERMISTORHEATER_1 == n || THERMISTORHEATER_2 == n || THERMISTORHEATER_3 == n || THERMISTORBED == n)
+
+#if ANY_THERMISTOR_IS(1) // 100k bed thermistor
 const short temptable_1[][2] PROGMEM = {
   {   23 * OVERSAMPLENR, 300 },
   {   25 * OVERSAMPLENR, 295 },
@@ -94,7 +96,7 @@ const short temptable_1[][2] PROGMEM = {
 };
 #endif
 
-#if (THERMISTORHEATER_0 == 2) || (THERMISTORHEATER_1 == 2) || (THERMISTORHEATER_2 == 2) || (THERMISTORHEATER_3 == 2) || (THERMISTORBED == 2) //200k bed thermistor
+#if ANY_THERMISTOR_IS(2) // 200k bed thermistor
 // 200k ATC Semitec 204GT-2
 // Verified by linagee. Source: http://shop.arcol.hu/static/datasheets/thermistors.pdf
 // Calculated using 4.7kohm pullup, voltage divider math, and manufacturer provided temp/resistance
@@ -134,7 +136,7 @@ const short temptable_2[][2] PROGMEM = {
 };
 #endif
 
-#if (THERMISTORHEATER_0 == 3) || (THERMISTORHEATER_1 == 3) || (THERMISTORHEATER_2 == 3) || (THERMISTORHEATER_3 == 3) || (THERMISTORBED == 3) //mendel-parts
+#if ANY_THERMISTOR_IS(3) // mendel-parts
 const short temptable_3[][2] PROGMEM = {
   {    1 * OVERSAMPLENR, 864 },
   {   21 * OVERSAMPLENR, 300 },
@@ -167,7 +169,7 @@ const short temptable_3[][2] PROGMEM = {
 };
 #endif
 
-#if (THERMISTORHEATER_0 == 4) || (THERMISTORHEATER_1 == 4) || (THERMISTORHEATER_2 == 4) || (THERMISTORHEATER_3 == 4) || (THERMISTORBED == 4) //10k thermistor
+#if ANY_THERMISTOR_IS(4) // 10k thermistor
 const short temptable_4[][2] PROGMEM = {
   {    1 * OVERSAMPLENR, 430 },
   {   54 * OVERSAMPLENR, 137 },
@@ -192,7 +194,7 @@ const short temptable_4[][2] PROGMEM = {
 };
 #endif
 
-#if (THERMISTORHEATER_0 == 5) || (THERMISTORHEATER_1 == 5) || (THERMISTORHEATER_2 == 5) || (THERMISTORHEATER_3 == 5) || (THERMISTORBED == 5) //100k ParCan thermistor (104GT-2)
+#if ANY_THERMISTOR_IS(5) // 100k ParCan thermistor (104GT-2)
 // ATC Semitec 104GT-2 (Used in ParCan)
 // Verified by linagee. Source: http://shop.arcol.hu/static/datasheets/thermistors.pdf
 // Calculated using 4.7kohm pullup, voltage divider math, and manufacturer provided temp/resistance
@@ -232,7 +234,7 @@ const short temptable_5[][2] PROGMEM = {
 };
 #endif
 
-#if (THERMISTORHEATER_0 == 6) || (THERMISTORHEATER_1 == 6) || (THERMISTORHEATER_2 == 6) || (THERMISTORHEATER_3 == 6) || (THERMISTORBED == 6) // 100k Epcos thermistor
+#if ANY_THERMISTOR_IS(6) // 100k Epcos thermistor
 const short temptable_6[][2] PROGMEM = {
   {    1 * OVERSAMPLENR, 350 },
   {   28 * OVERSAMPLENR, 250 }, // top rating 250C
@@ -275,7 +277,7 @@ const short temptable_6[][2] PROGMEM = {
 };
 #endif
 
-#if (THERMISTORHEATER_0 == 7) || (THERMISTORHEATER_1 == 7) || (THERMISTORHEATER_2 == 7) || (THERMISTORHEATER_3 == 7) || (THERMISTORBED == 7) // 100k Honeywell 135-104LAG-J01
+#if ANY_THERMISTOR_IS(7) // 100k Honeywell 135-104LAG-J01
 const short temptable_7[][2] PROGMEM = {
   {    1 * OVERSAMPLENR, 941 },
   {   19 * OVERSAMPLENR, 362 },
@@ -338,7 +340,7 @@ const short temptable_7[][2] PROGMEM = {
 };
 #endif
 
-#if (THERMISTORHEATER_0 == 71) || (THERMISTORHEATER_1 == 71) || (THERMISTORHEATER_2 == 71) || (THERMISTORHEATER_3 == 71) || (THERMISTORBED == 71) // 100k Honeywell 135-104LAF-J01
+#if ANY_THERMISTOR_IS(71) // 100k Honeywell 135-104LAF-J01
 // R0 = 100000 Ohm
 // T0 = 25 °C
 // Beta = 3974
@@ -489,7 +491,7 @@ const short temptable_71[][2] PROGMEM = {
 };
 #endif
 
-#if (THERMISTORHEATER_0 == 8) || (THERMISTORHEATER_1 == 8) || (THERMISTORHEATER_2 == 8) || (THERMISTORHEATER_3 == 8) || (THERMISTORBED == 8)
+#if ANY_THERMISTOR_IS(8)
 // 100k 0603 SMD Vishay NTCS0603E3104FXT (4.7k pullup)
 const short temptable_8[][2] PROGMEM = {
   {    1 * OVERSAMPLENR, 704 },
@@ -515,7 +517,7 @@ const short temptable_8[][2] PROGMEM = {
 };
 #endif
 
-#if (THERMISTORHEATER_0 == 9) || (THERMISTORHEATER_1 == 9) || (THERMISTORHEATER_2 == 9) || (THERMISTORHEATER_3 == 9) || (THERMISTORBED == 9)
+#if ANY_THERMISTOR_IS(9)
 // 100k GE Sensing AL03006-58.2K-97-G1 (4.7k pullup)
 const short temptable_9[][2] PROGMEM = {
   {    1 * OVERSAMPLENR, 936 },
@@ -552,7 +554,7 @@ const short temptable_9[][2] PROGMEM = {
 };
 #endif
 
-#if (THERMISTORHEATER_0 == 10) || (THERMISTORHEATER_1 == 10) || (THERMISTORHEATER_2 == 10) || (THERMISTORHEATER_3 == 10) || (THERMISTORBED == 10)
+#if ANY_THERMISTOR_IS(10)
 // 100k RS thermistor 198-961 (4.7k pullup)
 const short temptable_10[][2] PROGMEM = {
   {    1 * OVERSAMPLENR, 929 },
@@ -589,7 +591,7 @@ const short temptable_10[][2] PROGMEM = {
 };
 #endif
 
-#if (THERMISTORHEATER_0 == 11) || (THERMISTORHEATER_1 == 11) || (THERMISTORHEATER_2 == 11) || (THERMISTORHEATER_3 == 11) || (THERMISTORBED == 11)
+#if ANY_THERMISTOR_IS(11)
 // QU-BD silicone bed QWG-104F-3950 thermistor
 const short temptable_11[][2] PROGMEM = {
   {    1 * OVERSAMPLENR, 938 },
@@ -645,7 +647,7 @@ const short temptable_11[][2] PROGMEM = {
 };
 #endif
 
-#if (THERMISTORHEATER_0 == 13) || (THERMISTORHEATER_1 == 13) || (THERMISTORHEATER_2 == 13) || (THERMISTORHEATER_3 == 13) || (THERMISTORBED == 13)
+#if ANY_THERMISTOR_IS(13)
 // Hisens thermistor B25/50 =3950 +/-1%
 const short temptable_13[][2] PROGMEM = {
   {  20.04 * OVERSAMPLENR, 300 },
@@ -675,7 +677,7 @@ const short temptable_13[][2] PROGMEM = {
 };
 #endif
 
-#if (THERMISTORHEATER_0 == 20) || (THERMISTORHEATER_1 == 20) || (THERMISTORHEATER_2 == 20) || (THERMISTORBED == 20) // PT100 with INA826 amp on Ultimaker v2.0 electronics
+#if ANY_THERMISTOR_IS(20) // PT100 with INA826 amp on Ultimaker v2.0 electronics
 // The PT100 in the Ultimaker v2.0 electronics has a high sample value for a high temperature.
 // This does not match the normal thermistor behaviour so we need to set the following defines
 #if (THERMISTORHEATER_0 == 20)
@@ -751,7 +753,7 @@ const short temptable_20[][2] PROGMEM = {
 };
 #endif
 
-#if (THERMISTORHEATER_0 == 51) || (THERMISTORHEATER_1 == 51) || (THERMISTORHEATER_2 == 51) || (THERMISTORHEATER_3 == 51) || (THERMISTORBED == 51)
+#if ANY_THERMISTOR_IS(51)
 // 100k EPCOS (WITH 1kohm RESISTOR FOR PULLUP, R9 ON SANGUINOLOLU! NOT FOR 4.7kohm PULLUP! THIS IS NOT NORMAL!)
 // Verified by linagee.
 // Calculated using 1kohm pullup, voltage divider math, and manufacturer provided temp/resistance
@@ -813,7 +815,7 @@ const short temptable_51[][2] PROGMEM = {
 };
 #endif
 
-#if (THERMISTORHEATER_0 == 52) || (THERMISTORHEATER_1 == 52) || (THERMISTORHEATER_2 == 52) || (THERMISTORHEATER_3 == 52) || (THERMISTORBED == 52)
+#if ANY_THERMISTOR_IS(52)
 // 200k ATC Semitec 204GT-2 (WITH 1kohm RESISTOR FOR PULLUP, R9 ON SANGUINOLOLU! NOT FOR 4.7kohm PULLUP! THIS IS NOT NORMAL!)
 // Verified by linagee. Source: http://shop.arcol.hu/static/datasheets/thermistors.pdf
 // Calculated using 1kohm pullup, voltage divider math, and manufacturer provided temp/resistance
@@ -854,7 +856,7 @@ const short temptable_52[][2] PROGMEM = {
 };
 #endif
 
-#if (THERMISTORHEATER_0 == 55) || (THERMISTORHEATER_1 == 55) || (THERMISTORHEATER_2 == 55) || (THERMISTORHEATER_3 == 55) || (THERMISTORBED == 55)
+#if ANY_THERMISTOR_IS(55)
 // 100k ATC Semitec 104GT-2 (Used on ParCan) (WITH 1kohm RESISTOR FOR PULLUP, R9 ON SANGUINOLOLU! NOT FOR 4.7kohm PULLUP! THIS IS NOT NORMAL!)
 // Verified by linagee. Source: http://shop.arcol.hu/static/datasheets/thermistors.pdf
 // Calculated using 1kohm pullup, voltage divider math, and manufacturer provided temp/resistance
@@ -895,7 +897,7 @@ const short temptable_55[][2] PROGMEM = {
 };
 #endif
 
-#if (THERMISTORHEATER_0 == 60) || (THERMISTORHEATER_1 == 60) || (THERMISTORHEATER_2 == 60) || (THERMISTORHEATER_3 == 60) || (THERMISTORBED == 60) // Maker's Tool Works Kapton Bed Thermistor
+#if ANY_THERMISTOR_IS(60) // Maker's Tool Works Kapton Bed Thermistor
 // ./createTemperatureLookup.py --r0=100000 --t0=25 --r1=0 --r2=4700 --beta=3950
 // r0: 100000
 // t0: 25
@@ -980,7 +982,40 @@ const short temptable_60[][2] PROGMEM = {
 };
 #endif
 
-#if (THERMISTORHEATER_0 == 12) || (THERMISTORHEATER_1 == 12) || (THERMISTORHEATER_2 == 12) || (THERMISTORHEATER_3 == 12) || (THERMISTORBED == 12)
+#if ANY_THERMISTOR_IS(66)
+// DyzeDesign 500°C Thermistor
+const short temptable_66[][2] PROGMEM = {
+  {   17.5 * OVERSAMPLENR, 850 },
+  {   17.9 * OVERSAMPLENR, 500 },
+  {   21.7 * OVERSAMPLENR, 480 },
+  {   26.6 * OVERSAMPLENR, 460 },
+  {   33.1 * OVERSAMPLENR, 440 },
+  {   41.0 * OVERSAMPLENR, 420 },
+  {   52.3 * OVERSAMPLENR, 400 },
+  {   67.7 * OVERSAMPLENR, 380 },
+  {   86.5 * OVERSAMPLENR, 360 },
+  {  112.0 * OVERSAMPLENR, 340 },
+  {  147.2 * OVERSAMPLENR, 320 },
+  {  194.0 * OVERSAMPLENR, 300 },
+  {  254.3 * OVERSAMPLENR, 280 },
+  {  330.2 * OVERSAMPLENR, 260 },
+  {  427.9 * OVERSAMPLENR, 240 },
+  {  533.4 * OVERSAMPLENR, 220 },
+  {  646.5 * OVERSAMPLENR, 200 },
+  {  754.4 * OVERSAMPLENR, 180 },
+  {  844.3 * OVERSAMPLENR, 160 },
+  {  911.7 * OVERSAMPLENR, 140 },
+  {  958.6 * OVERSAMPLENR, 120 },
+  {  988.8 * OVERSAMPLENR, 100 },
+  { 1006.6 * OVERSAMPLENR,  80 },
+  { 1015.8 * OVERSAMPLENR,  60 },
+  { 1021.3 * OVERSAMPLENR,  30 },
+  {   1023 * OVERSAMPLENR - 1, 25},
+  {   1023 * OVERSAMPLENR,  20}
+};
+#endif
+
+#if ANY_THERMISTOR_IS(12)
 // 100k 0603 SMD Vishay NTCS0603E3104FXT (4.7k pullup) (calibrated for Makibox hot bed)
 const short temptable_12[][2] PROGMEM = {
   {   35 * OVERSAMPLENR, 180 }, // top rating 180C
@@ -1016,7 +1051,7 @@ const short temptable_12[][2] PROGMEM = {
 };
 #endif
 
-#if (THERMISTORHEATER_0 == 70) || (THERMISTORHEATER_1 == 70) || (THERMISTORHEATER_2 == 70) || (THERMISTORHEATER_3 == 70) || (THERMISTORBED == 70) // bqh2 stock thermistor
+#if ANY_THERMISTOR_IS(70) // bqh2 stock thermistor
 const short temptable_70[][2] PROGMEM = {
   {   22 * OVERSAMPLENR, 300 },
   {   24 * OVERSAMPLENR, 295 },
@@ -1082,6 +1117,73 @@ const short temptable_70[][2] PROGMEM = {
 };
 #endif
 
+#if ANY_THERMISTOR_IS(75) // Generic Silicon Heat Pad with NTC 100K thermistor ( Beta 25/50 3950K) 
+const short temptable_75[][2] PROGMEM = {
+    { (short) (  11.64 * OVERSAMPLENR ),  350 }, // v=0.057     r=54.019        res=6.690 degC/count
+    { (short) (  12.53 * OVERSAMPLENR ),  344 }, // v=0.061     r=58.212        res=6.131 degC/count
+    { (short) (  13.51 * OVERSAMPLENR ),  338 }, // v=0.066     r=62.815        res=5.610 degC/count
+    { (short) (  14.58 * OVERSAMPLENR ),  332 }, // v=0.071     r=67.877        res=5.125 degC/count
+    { (short) (  15.76 * OVERSAMPLENR ),  326 }, // v=0.077     r=73.453        res=4.675 degC/count
+    { (short) (  17.05 * OVERSAMPLENR ),  320 }, // v=0.083     r=79.602        res=4.258 degC/count
+    { (short) (  18.48 * OVERSAMPLENR ),  314 }, // v=0.090     r=86.397        res=3.872 degC/count
+    { (short) (  20.06 * OVERSAMPLENR ),  308 }, // v=0.098     r=93.917        res=3.516 degC/count
+    { (short) (  21.80 * OVERSAMPLENR ),  302 }, // v=0.106     r=102.255       res=3.187 degC/count
+    { (short) (  23.73 * OVERSAMPLENR ),  296 }, // v=0.116     r=111.514       res=2.885 degC/count
+    { (short) (  25.87 * OVERSAMPLENR ),  290 }, // v=0.126     r=121.816       res=2.607 degC/count
+    { (short) (  28.24 * OVERSAMPLENR ),  284 }, // v=0.138     r=133.299       res=2.352 degC/count
+    { (short) (  30.88 * OVERSAMPLENR ),  278 }, // v=0.151     r=146.124       res=2.119 degC/count
+    { (short) (  33.81 * OVERSAMPLENR ),  272 }, // v=0.165     r=160.475       res=1.907 degC/count
+    { (short) (  37.08 * OVERSAMPLENR ),  266 }, // v=0.181     r=176.565       res=1.713 degC/count
+    { (short) (  40.72 * OVERSAMPLENR ),  260 }, // v=0.199     r=194.644       res=1.536 degC/count
+    { (short) (  44.79 * OVERSAMPLENR ),  254 }, // v=0.219     r=215.000       res=1.376 degC/count
+    { (short) (  49.35 * OVERSAMPLENR ),  248 }, // v=0.241     r=237.970       res=1.231 degC/count
+    { (short) (  54.45 * OVERSAMPLENR ),  242 }, // v=0.266     r=263.948       res=1.100 degC/count
+    { (short) (  60.17 * OVERSAMPLENR ),  236 }, // v=0.294     r=293.394       res=0.982 degC/count
+    { (short) (  66.58 * OVERSAMPLENR ),  230 }, // v=0.325     r=326.853       res=0.876 degC/count
+    { (short) (  73.79 * OVERSAMPLENR ),  224 }, // v=0.360     r=364.962       res=0.780 degC/count
+    { (short) (  81.88 * OVERSAMPLENR ),  218 }, // v=0.400     r=408.478       res=0.695 degC/count
+    { (short) (  90.98 * OVERSAMPLENR ),  212 }, // v=0.444     r=458.296       res=0.619 degC/count
+    { (short) ( 101.21 * OVERSAMPLENR ),  206 }, // v=0.494     r=515.481       res=0.550 degC/count
+    { (short) ( 112.71 * OVERSAMPLENR ),  200 }, // v=0.550     r=581.300       res=0.490 degC/count
+    { (short) ( 125.63 * OVERSAMPLENR ),  194 }, // v=0.613     r=657.273       res=0.436 degC/count
+    { (short) ( 140.14 * OVERSAMPLENR ),  188 }, // v=0.684     r=745.220       res=0.389 degC/count
+    { (short) ( 156.41 * OVERSAMPLENR ),  182 }, // v=0.764     r=847.333       res=0.348 degC/count
+    { (short) ( 174.62 * OVERSAMPLENR ),  176 }, // v=0.853     r=966.260       res=0.311 degC/count
+    { (short) ( 194.95 * OVERSAMPLENR ),  170 }, // v=0.952     r=1105.209      res=0.279 degC/count
+    { (short) ( 217.58 * OVERSAMPLENR ),  164 }, // v=1.062     r=1268.086      res=0.251 degC/count
+    { (short) ( 242.66 * OVERSAMPLENR ),  158 }, // v=1.185     r=1459.655      res=0.227 degC/count
+    { (short) ( 270.32 * OVERSAMPLENR ),  152 }, // v=1.320     r=1685.760      res=0.207 degC/count
+    { (short) ( 300.66 * OVERSAMPLENR ),  146 }, // v=1.468     r=1953.587      res=0.189 degC/count
+    { (short) ( 333.70 * OVERSAMPLENR ),  140 }, // v=1.629     r=2272.018      res=0.174 degC/count
+    { (short) ( 369.38 * OVERSAMPLENR ),  134 }, // v=1.804     r=2652.067      res=0.162 degC/count
+    { (short) ( 407.56 * OVERSAMPLENR ),  128 }, // v=1.990     r=3107.463      res=0.152 degC/count
+    { (short) ( 447.99 * OVERSAMPLENR ),  122 }, // v=2.187     r=3655.381      res=0.145 degC/count
+    { (short) ( 490.28 * OVERSAMPLENR ),  116 }, // v=2.394     r=4317.420      res=0.139 degC/count
+    { (short) ( 533.94 * OVERSAMPLENR ),  110 }, // v=2.607     r=5120.859      res=0.136 degC/count
+    { (short) ( 578.38 * OVERSAMPLENR ),  104 }, // v=2.824     r=6100.330      res=0.134 degC/count
+    { (short) ( 622.93 * OVERSAMPLENR ),   98 }, // v=3.042     r=7300.016      res=0.135 degC/count
+    { (short) ( 666.88 * OVERSAMPLENR ),   92 }, // v=3.256     r=8776.582      res=0.138 degC/count
+    { (short) ( 709.50 * OVERSAMPLENR ),   86 }, // v=3.464     r=10603.098     res=0.144 degC/count
+    { (short) ( 750.15 * OVERSAMPLENR ),   80 }, // v=3.663     r=12874.313     res=0.152 degC/count
+    { (short) ( 788.24 * OVERSAMPLENR ),   74 }, // v=3.849     r=15713.805     res=0.164 degC/count
+    { (short) ( 823.33 * OVERSAMPLENR ),   68 }, // v=4.020     r=19283.720     res=0.179 degC/count
+    { (short) ( 855.12 * OVERSAMPLENR ),   62 }, // v=4.175     r=23798.137     res=0.200 degC/count
+    { (short) ( 883.45 * OVERSAMPLENR ),   56 }, // v=4.314     r=29541.531     res=0.226 degC/count
+    { (short) ( 908.29 * OVERSAMPLENR ),   50 }, // v=4.435     r=36894.461     res=0.260 degC/count
+    { (short) ( 929.76 * OVERSAMPLENR ),   44 }, // v=4.540     r=46369.574     res=0.304 degC/count
+    { (short) ( 948.04 * OVERSAMPLENR ),   38 }, // v=4.629     r=58662.448     res=0.360 degC/count
+    { (short) ( 963.40 * OVERSAMPLENR ),   32 }, // v=4.704     r=74723.985     res=0.432 degC/count
+    { (short) ( 976.14 * OVERSAMPLENR ),   26 }, // v=4.766     r=95864.309     res=0.525 degC/count
+    { (short) ( 986.58 * OVERSAMPLENR ),   20 }, // v=4.817     r=123903.203    res=0.646 degC/count
+    { (short) ( 995.02 * OVERSAMPLENR ),   14 }, // v=4.859     r=161389.845    res=0.806 degC/count
+    { (short) (1001.78 * OVERSAMPLENR ),    8 }, // v=4.892     r=211926.812    res=1.018 degC/count
+    { (short) (1007.13 * OVERSAMPLENR ),    2 }, // v=4.918     r=280652.451    res=1.302 degC/count
+};
+#endif
+
+
+
+
 // Pt1000 and Pt100 handling
 //
 // Rt=R0*(1+a*T+b*T*T) [for T>0]
@@ -1093,7 +1195,7 @@ const short temptable_70[][2] PROGMEM = {
 #define PtAdVal(T,R0,Rup) (short)(1024/(Rup/PtRt(T,R0)+1))
 #define PtLine(T,R0,Rup) { PtAdVal(T,R0,Rup)*OVERSAMPLENR, T },
 
-#if (THERMISTORHEATER_0 == 110) || (THERMISTORHEATER_1 == 110) || (THERMISTORHEATER_2 == 110) || (THERMISTORHEATER_3 == 110) || (THERMISTORBED == 110) // Pt100 with 1k0 pullup
+#if ANY_THERMISTOR_IS(110) // Pt100 with 1k0 pullup
 const short temptable_110[][2] PROGMEM = {
   // only few values are needed as the curve is very flat
   PtLine(  0, 100, 1000)
@@ -1105,7 +1207,7 @@ const short temptable_110[][2] PROGMEM = {
   PtLine(300, 100, 1000)
 };
 #endif
-#if (THERMISTORHEATER_0 == 147) || (THERMISTORHEATER_1 == 147) || (THERMISTORHEATER_2 == 147) || (THERMISTORHEATER_3 == 147) || (THERMISTORBED == 147) // Pt100 with 4k7 pullup
+#if ANY_THERMISTOR_IS(147) // Pt100 with 4k7 pullup
 const short temptable_147[][2] PROGMEM = {
   // only few values are needed as the curve is very flat
   PtLine(  0, 100, 4700)
@@ -1117,7 +1219,7 @@ const short temptable_147[][2] PROGMEM = {
   PtLine(300, 100, 4700)
 };
 #endif
-#if (THERMISTORHEATER_0 == 1010) || (THERMISTORHEATER_1 == 1010) || (THERMISTORHEATER_2 == 1010) || (THERMISTORHEATER_3 == 1010) || (THERMISTORBED == 1010) // Pt1000 with 1k0 pullup
+#if ANY_THERMISTOR_IS(1010) // Pt1000 with 1k0 pullup
 const short temptable_1010[][2] PROGMEM = {
   PtLine(  0, 1000, 1000)
   PtLine( 25, 1000, 1000)
@@ -1134,7 +1236,7 @@ const short temptable_1010[][2] PROGMEM = {
   PtLine(300, 1000, 1000)
 };
 #endif
-#if (THERMISTORHEATER_0 == 1047) || (THERMISTORHEATER_1 == 1047) || (THERMISTORHEATER_2 == 1047) || (THERMISTORHEATER_3 == 1047) || (THERMISTORBED == 1047) // Pt1000 with 4k7 pullup
+#if ANY_THERMISTOR_IS(1047) // Pt1000 with 4k7 pullup
 const short temptable_1047[][2] PROGMEM = {
   // only few values are needed as the curve is very flat
   PtLine(  0, 1000, 4700)
@@ -1147,7 +1249,7 @@ const short temptable_1047[][2] PROGMEM = {
 };
 #endif
 
-#if (THERMISTORHEATER_0 == 999) || (THERMISTORHEATER_1 == 999) || (THERMISTORHEATER_2 == 999) || (THERMISTORHEATER_3 == 999) || (THERMISTORBED == 999) //User defined table
+#if ANY_THERMISTOR_IS(999) // User-defined table
   // Dummy Thermistor table.. It will ALWAYS read a fixed value.
   #ifndef DUMMY_THERMISTOR_999_VALUE
     #define DUMMY_THERMISTOR_999_VALUE 25
@@ -1158,7 +1260,7 @@ const short temptable_1047[][2] PROGMEM = {
 };
 #endif
 
-#if (THERMISTORHEATER_0 == 998) || (THERMISTORHEATER_1 == 998) || (THERMISTORHEATER_2 == 998) || (THERMISTORHEATER_3 == 998) || (THERMISTORBED == 998) //User defined table
+#if ANY_THERMISTOR_IS(998) // User-defined table
   // Dummy Thermistor table.. It will ALWAYS read a fixed value.
   #ifndef DUMMY_THERMISTOR_998_VALUE
     #define DUMMY_THERMISTOR_998_VALUE 25
