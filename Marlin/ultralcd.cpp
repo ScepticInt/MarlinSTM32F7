@@ -45,6 +45,12 @@ int absPreheatFanSpeed;
   millis_t previous_lcd_status_ms = 0;
 #endif
 
+#if ENABLED(BABYSTEPPING)
+  long babysteps_done = 0;
+  millis_t status_screen_click_time = 0;
+  static void lcd_babystep_z();
+#endif
+
 uint8_t lcd_status_message_level;
 char lcd_status_message[3 * (LCD_WIDTH) + 1] = WELCOME_MSG; // worst case is kana with up to 3*LCD_WIDTH+1
 
@@ -379,6 +385,21 @@ uint8_t lcdDrawUpdate = LCDVIEW_CLEAR_CALL_REDRAW; // Set when the LCD needs to 
    * Remembers the previous position
    */
   static void lcd_goto_screen(screenFunc_t screen, const bool feedback = false, const uint32_t encoder = 0) {
+	  
+  #if ENABLED(BABYSTEPPING)
+    if (currentScreen==lcd_status_screen && screen==lcd_main_menu)	// We are leaving the status screen to goto the main_menu 
+      status_screen_click_time = millis();				// screen.  Mark the time so we know how quick the user is
+									// pressing buttons.
+    if (currentScreen==lcd_main_menu)  {
+      if ( screen==lcd_status_screen && status_screen_click_time+1250>millis() ) {
+        lcdDrawUpdate = LCDVIEW_CLEAR_CALL_REDRAW;
+	status_screen_click_time = 0;
+	lcd_babystep_z();
+	return;
+      }
+    }
+  #endif
+
     if (currentScreen != screen) {
       currentScreen = screen;
       lcdDrawUpdate = LCDVIEW_CLEAR_CALL_REDRAW;
