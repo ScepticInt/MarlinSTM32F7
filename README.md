@@ -22,6 +22,7 @@ When bringing up the system, it is advisable to start with the Configuration.h f
 The full set of parameters for G29 and G26 are provided at the end of this page.
 
 ## Recent Changes
+- 11-23-2016    Easy access to Z-BabyStepping!   You can set the #define QUICK_ACCESS_TO_Z_BABY_STEPPING_VIA_KILL_PIN in Configuration.h or you can just click the Encoder Wheel twice (within 1.25 seconds) while on the Status Screen.
 - 9-17-2016    Version 2 of the UBL Code Base.   It should have the Z-Offset bug fixed and other small annoyances items.  It also has a new mesh_buffer_line() routine that is iterative instead of recursive.  It was written to free up CPU cycles to give Delta's the best chance of working well with the high resolution Mesh system.
 
 ## To Do Items
