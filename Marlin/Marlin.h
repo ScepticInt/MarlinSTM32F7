@@ -346,7 +346,6 @@ extern bool axis_homed[3]; // axis[n].is_homed
 #define RAW_X_POSITION(POS)         RAW_POSITION(POS, X_AXIS)
 #define RAW_Y_POSITION(POS)         RAW_POSITION(POS, Y_AXIS)
 #define RAW_Z_POSITION(POS)         RAW_POSITION(POS, Z_AXIS)
-#define RAW_CURRENT_POSITION(AXIS)  RAW_POSITION(current_position[AXIS], AXIS)
 
 // GCode support for external objects
 bool code_seen(char);
